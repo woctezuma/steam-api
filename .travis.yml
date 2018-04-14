@@ -1,0 +1,9 @@
+language: python
+python:
+ - "3.6"
+install:
+ - pip install -r requirements.txt
+script:
+- python json_data_utils.py
+- python steam_catalog_utils.py
+- python app_details_utils.py
