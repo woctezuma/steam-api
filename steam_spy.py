@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import time
 
 from app_details_utils import load_app_details
@@ -19,8 +20,7 @@ def load_text_file(file_name):
             file_content = [line.strip() for line in f]
     except FileNotFoundError:
         file_content = []
-        with open(file_name, "w") as f:
-            print('Creating ' + file_name)
+        pathlib.Path(file_name).touch()
     return file_content
 
 
