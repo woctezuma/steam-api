@@ -41,14 +41,15 @@ def load_app_details(app_id):
 
     try:
         loaded_app_details = load_data(json_filename)
+        success_flag = True
     except FileNotFoundError:
         (loaded_app_details, success_flag) = download_app_details(app_id)
         if success_flag:
             save_data(json_filename, loaded_app_details)
 
-    return loaded_app_details
+    return loaded_app_details, success_flag
 
 
 if __name__ == '__main__':
     appID = '440'
-    app_details = load_app_details(appID)
+    (app_details, is_success) = load_app_details(appID)

@@ -52,13 +52,14 @@ def load_steam_catalog():
 
     try:
         loaded_steam_catalog = load_data(json_filename)
+        success_flag = True
     except FileNotFoundError:
         (loaded_steam_catalog, success_flag) = download_steam_catalog()
         if success_flag:
             save_data(json_filename, loaded_steam_catalog)
 
-    return loaded_steam_catalog
+    return loaded_steam_catalog, success_flag
 
 
 if __name__ == '__main__':
-    steam_catalog = load_steam_catalog()
+    (steam_catalog, is_success) = load_steam_catalog()
