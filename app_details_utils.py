@@ -11,7 +11,10 @@ def download_app_details(app_id):
     downloaded_app_details = {}
 
     if success_flag:
-        downloaded_app_details = data[app_id]['data']
+        try:
+            downloaded_app_details = data[app_id]['data']
+        except KeyError:
+            print('No data found for appID=' + app_id)
         success_flag = data[app_id]['success']
 
     return downloaded_app_details, success_flag
