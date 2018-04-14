@@ -24,17 +24,17 @@ def load_text_file(file_name):
     return file_content
 
 
-def load_previously_seen_appIDs():
-    previously_seen_appIDs = set()
+def load_previously_seen_app_ids():
+    previously_seen_app_ids = set()
 
     success_filename = get_success_filename()
     error_filename = get_error_filename()
 
     for appid_log_file_name in [success_filename, error_filename]:
-        parsed_appIDs = load_text_file(appid_log_file_name)
-        previously_seen_appIDs.union(parsed_appIDs)
+        parsed_app_ids = load_text_file(appid_log_file_name)
+        previously_seen_app_ids.union(parsed_app_ids)
 
-    return previously_seen_appIDs
+    return previously_seen_app_ids
 
 
 def scrape_steam_data():
@@ -54,16 +54,16 @@ def scrape_steam_data():
     if query_status_code is not None:
         query_count += 1
 
-    all_appIDs = list(steam_catalog.keys())
+    all_app_ids = list(steam_catalog.keys())
 
-    previously_seen_appIDs = load_previously_seen_appIDs()
+    previously_seen_app_ids = load_previously_seen_app_ids()
 
-    unseen_appIDs = set(all_appIDs).difference(previously_seen_appIDs)
+    unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
     success_filename = get_success_filename()
     error_filename = get_error_filename()
 
-    for appID in unseen_appIDs:
+    for appID in unseen_app_ids:
 
         if query_count >= query_rate_limit:
             log.info("query count is %d ; limit %d reached. Wait for %d sec", query_count, query_rate_limit, wait_time)
@@ -84,7 +84,7 @@ def scrape_steam_data():
                 query_count += 1
 
         appid_log_file_name = success_filename
-        if (query_status_code is not None) and not (is_success):
+        if (query_status_code is not None) and not is_success:
             assert (query_status_code == successful_status_code)
             appid_log_file_name = error_filename
 
