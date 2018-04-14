@@ -42,8 +42,8 @@ def scrape_steam_data():
     logging.getLogger('requests').setLevel(logging.DEBUG)
     log = logging.getLogger(__name__)
 
-    query_rate_limit = 200  # Number of queries which can be successfully issued during a 5-minute time window
-    wait_time = (5 * 60) + 10  # 5 minutes plus a cushion
+    query_rate_limit = 200  # Number of queries which can be successfully issued during a 4-minute time window
+    wait_time = (4 * 60) + 10  # 4 minutes plus a cushion
     successful_status_code = 200  # Status code for a successful HTTP response
 
     query_count = 0
