@@ -6,13 +6,15 @@ from json_data_utils import download_data, save_data, load_data
 def download_app_details(app_id):
     url = 'http://store.steampowered.com/api/appdetails?appids=' + app_id
     (data, status_code) = download_data(url)
+    success_flag = bool(data is not None)
 
     downloaded_app_details = {}
 
-    if data is not None:
+    if success_flag:
         downloaded_app_details = data[app_id]['data']
+        success_flag = data[app_id]['success']
 
-    return downloaded_app_details
+    return downloaded_app_details, success_flag
 
 
 def get_json_filename_for_app_details(app_id):
@@ -40,8 +42,9 @@ def load_app_details(app_id):
     try:
         loaded_app_details = load_data(json_filename)
     except FileNotFoundError:
-        loaded_app_details = download_app_details(app_id)
-        save_data(json_filename, loaded_app_details)
+        (loaded_app_details, success_flag) = download_app_details(app_id)
+        if success_flag:
+            save_data(json_filename, loaded_app_details)
 
     return loaded_app_details
 

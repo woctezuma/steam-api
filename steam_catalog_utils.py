@@ -7,10 +7,11 @@ from json_data_utils import download_data, save_data, load_data
 def download_steam_catalog():
     url = 'http://api.steampowered.com/ISteamApps/GetAppList/v0002/'
     (data, status_code) = download_data(url)
+    success_flag = bool(data is not None)
 
     downloaded_steam_catalog = {}
 
-    if data is not None:
+    if success_flag:
 
         # noinspection SpellCheckingInspection
         for app in data['applist']['apps']:
@@ -21,7 +22,7 @@ def download_steam_catalog():
             downloaded_steam_catalog[app_id] = {}
             downloaded_steam_catalog[app_id]['name'] = app_name
 
-    return downloaded_steam_catalog
+    return downloaded_steam_catalog, success_flag
 
 
 # noinspection SpellCheckingInspection
@@ -52,8 +53,9 @@ def load_steam_catalog():
     try:
         loaded_steam_catalog = load_data(json_filename)
     except FileNotFoundError:
-        loaded_steam_catalog = download_steam_catalog()
-        save_data(json_filename, loaded_steam_catalog)
+        (loaded_steam_catalog, success_flag) = download_steam_catalog()
+        if success_flag:
+            save_data(json_filename, loaded_steam_catalog)
 
     return loaded_steam_catalog
 
