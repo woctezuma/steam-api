@@ -6,11 +6,11 @@ from app_details_utils import load_app_details
 from steam_catalog_utils import load_steam_catalog
 
 
-def get_success_filename():
+def get_previously_seen_app_ids_of_games():
     return 'successful_appIDs.txt'
 
 
-def get_error_filename():
+def get_previously_seen_app_ids_of_non_games():
     return 'faulty_appIDs.txt'
 
 
@@ -27,8 +27,8 @@ def load_text_file(file_name):
 def load_previously_seen_app_ids():
     previously_seen_app_ids = set()
 
-    success_filename = get_success_filename()
-    error_filename = get_error_filename()
+    success_filename = get_previously_seen_app_ids_of_games()
+    error_filename = get_previously_seen_app_ids_of_non_games()
 
     for appid_log_file_name in [success_filename, error_filename]:
         parsed_app_ids = load_text_file(appid_log_file_name)
@@ -60,8 +60,8 @@ def scrape_steam_data():
 
     unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
-    success_filename = get_success_filename()
-    error_filename = get_error_filename()
+    success_filename = get_previously_seen_app_ids_of_games()
+    error_filename = get_previously_seen_app_ids_of_non_games()
 
     for appID in unseen_app_ids:
 
