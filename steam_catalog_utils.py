@@ -22,7 +22,7 @@ def download_steam_catalog():
             downloaded_steam_catalog[app_id] = {}
             downloaded_steam_catalog[app_id]['name'] = app_name
 
-    return downloaded_steam_catalog, success_flag
+    return downloaded_steam_catalog, success_flag, status_code
 
 
 # noinspection SpellCheckingInspection
@@ -53,13 +53,14 @@ def load_steam_catalog():
     try:
         loaded_steam_catalog = load_data(json_filename)
         success_flag = True
+        status_code = None
     except FileNotFoundError:
-        (loaded_steam_catalog, success_flag) = download_steam_catalog()
+        (loaded_steam_catalog, success_flag, status_code) = download_steam_catalog()
         if success_flag:
             save_data(json_filename, loaded_steam_catalog)
 
-    return loaded_steam_catalog, success_flag
+    return loaded_steam_catalog, success_flag, status_code
 
 
 if __name__ == '__main__':
-    (steam_catalog, is_success) = load_steam_catalog()
+    (steam_catalog, is_success, query_status_code) = load_steam_catalog()

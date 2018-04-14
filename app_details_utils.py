@@ -17,7 +17,7 @@ def download_app_details(app_id):
             print('No data found for appID=' + app_id)
         success_flag = data[app_id]['success']
 
-    return downloaded_app_details, success_flag
+    return downloaded_app_details, success_flag, status_code
 
 
 def get_json_filename_for_app_details(app_id):
@@ -45,14 +45,15 @@ def load_app_details(app_id):
     try:
         loaded_app_details = load_data(json_filename)
         success_flag = True
+        status_code = None
     except FileNotFoundError:
-        (loaded_app_details, success_flag) = download_app_details(app_id)
+        (loaded_app_details, success_flag, status_code) = download_app_details(app_id)
         if success_flag:
             save_data(json_filename, loaded_app_details)
 
-    return loaded_app_details, success_flag
+    return loaded_app_details, success_flag, status_code
 
 
 if __name__ == '__main__':
     appID = '440'
-    (app_details, is_success) = load_app_details(appID)
+    (app_details, is_success, query_status_code) = load_app_details(appID)
