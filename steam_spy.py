@@ -232,7 +232,7 @@ def get_steam_genres_filename():
 
 if __name__ == '__main__':
     print('Scraping data from the web')
-    # scrape_steam_data()
+    scrape_steam_data()
 
     print('Aggregating data locally')
     (steamspy_database, categories, genres) = aggregate_steam_data()
