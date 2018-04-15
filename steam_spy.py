@@ -3,15 +3,20 @@ import pathlib
 import time
 
 from app_details_utils import load_app_details
+from json_data_utils import get_data_path, save_data
 from steam_catalog_utils import load_steam_catalog
 
 
 def get_previously_seen_app_ids_of_games():
-    return 'successful_appIDs.txt'
+    log_filename = get_data_path() + 'successful_appIDs.txt'
+
+    return log_filename
 
 
 def get_previously_seen_app_ids_of_non_games():
-    return 'faulty_appIDs.txt'
+    log_filename = get_data_path() + 'faulty_appIDs.txt'
+
+    return log_filename
 
 
 def load_text_file(file_name):
@@ -207,9 +212,32 @@ def aggregate_steam_data(verbose=True):
     return steam_database, all_categories, all_genres
 
 
+def get_steam_database_filename():
+    steam_database_filename = get_data_path() + 'steamspy.json'
+
+    return steam_database_filename
+
+
+def get_steam_categories_filename():
+    steam_categories_filename = get_data_path() + 'categories.json'
+
+    return steam_categories_filename
+
+
+def get_steam_genres_filename():
+    steam_genres_filename = get_data_path() + 'genres.json'
+
+    return steam_genres_filename
+
+
 if __name__ == '__main__':
-    scrape_steam_data()
+    print('Scraping data from the web')
+    # scrape_steam_data()
+
+    print('Aggregating data locally')
     (steamspy_database, categories, genres) = aggregate_steam_data()
 
-    print(categories)
-    print(genres)
+    print('Saving')
+    save_data(get_steam_database_filename(), steamspy_database)
+    save_data(get_steam_categories_filename(), categories)
+    save_data(get_steam_genres_filename(), genres)
