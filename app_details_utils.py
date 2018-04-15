@@ -1,6 +1,6 @@
 import pathlib
 
-from json_data_utils import download_data, save_data, load_data
+from json_data_utils import get_data_path, download_data, save_data, load_data
 
 
 def download_app_details(app_id):
@@ -25,7 +25,7 @@ def get_json_filename_for_app_details(app_id):
 
     # Data folder
     # noinspection SpellCheckingInspection
-    data_path = "data/appdetails/"
+    data_path = get_data_path() + "appdetails/"
 
     # Reference of the following line: https://stackoverflow.com/a/14364249
     pathlib.Path(data_path).mkdir(parents=True, exist_ok=True)

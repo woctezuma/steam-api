@@ -1,7 +1,7 @@
 import pathlib
 import time
 
-from json_data_utils import download_data, save_data, load_data
+from json_data_utils import get_data_path, download_data, save_data, load_data
 
 
 def download_steam_catalog():
@@ -30,7 +30,7 @@ def get_json_filename_for_steam_catalog():
     # Objective: return the filename of the Steam catalog
 
     # Data folder
-    data_path = "data/"
+    data_path = get_data_path()
 
     # Reference of the following line: https://stackoverflow.com/a/14364249
     pathlib.Path(data_path).mkdir(parents=True, exist_ok=True)

@@ -3,6 +3,13 @@ import json
 import requests
 
 
+def get_data_path():
+    # Data folder
+    data_path = "data/"
+
+    return data_path
+
+
 def download_data(url):
     response = requests.get(url)
     status_code = response.status_code
