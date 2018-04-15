@@ -32,7 +32,7 @@ def load_previously_seen_app_ids():
 
     for appid_log_file_name in [success_filename, error_filename]:
         parsed_app_ids = load_text_file(appid_log_file_name)
-        previously_seen_app_ids.union(parsed_app_ids)
+        previously_seen_app_ids = previously_seen_app_ids.union(parsed_app_ids)
 
     return previously_seen_app_ids
 
