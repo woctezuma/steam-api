@@ -17,7 +17,7 @@ def get_previously_seen_app_ids_of_non_games():
 def load_text_file(file_name):
     try:
         with open(file_name, "r") as f:
-            file_content = [line.strip() for line in f]
+            file_content = set([line.strip() for line in f])
     except FileNotFoundError:
         file_content = []
         pathlib.Path(file_name).touch()
@@ -94,5 +94,122 @@ def scrape_steam_data():
             f.write(appID + '\n')
 
 
+def aggregate_steam_data(verbose=True):
+    success_filename = get_previously_seen_app_ids_of_games()
+
+    parsed_app_ids = load_text_file(success_filename)
+
+    parsed_app_ids = sorted(parsed_app_ids, key=lambda x: int(x))
+
+    all_possible_info_type = []
+
+    steam_database = {}
+    all_categories = {}
+    all_genres = {}
+
+    for appID in parsed_app_ids:
+        (app_details, is_success, query_status_code) = load_app_details(appID)
+
+        if app_details['type'] == 'game':
+
+            # Keep track of the kind of info which can be found through Steam API
+            for available_info in app_details.keys():
+                if available_info not in all_possible_info_type:
+                    all_possible_info_type.append(available_info)
+
+            steam_database[appID] = {}
+            steam_database[appID]['name'] = app_details['name']
+            steam_database[appID]['steam_appid'] = app_details['steam_appid']
+            steam_database[appID]['required_age'] = app_details['required_age']
+            steam_database[appID]['is_free'] = app_details['is_free']
+
+            try:
+                steam_database[appID]['developers'] = app_details['developers']
+            except KeyError:
+                steam_database[appID]['developers'] = None
+
+            steam_database[appID]['publishers'] = app_details['publishers']
+
+            try:
+                steam_database[appID]['price_overview'] = app_details['price_overview']['initial']
+            except KeyError:
+                steam_database[appID]['price_overview'] = None
+
+            steam_database[appID]['platforms'] = app_details['platforms']
+
+            try:
+                steam_database[appID]['metacritic'] = app_details['metacritic']['score']
+            except KeyError:
+                steam_database[appID]['metacritic'] = None
+
+            try:
+                steam_database[appID]['categories'] = [categorie['id'] for categorie in app_details['categories']]
+
+                d = {}
+                for elem in app_details['categories']:
+                    k = elem['id']
+                    v = elem['description']
+                    d[k] = v
+                all_categories.update(d)
+
+            except KeyError:
+                steam_database[appID]['categories'] = []
+
+            try:
+                steam_database[appID]['genres'] = [genre['id'] for genre in app_details['genres']]
+
+                d = {}
+                for elem in app_details['genres']:
+                    k = elem['id']
+                    v = elem['description']
+                    d[k] = v
+                all_genres.update(d)
+
+            except KeyError:
+                steam_database[appID]['genres'] = []
+
+            try:
+                steam_database[appID]['recommendations'] = app_details['recommendations']
+            except KeyError:
+                steam_database[appID]['recommendations'] = 0
+
+            try:
+                steam_database[appID]['achievements'] = app_details['achievements']['total']
+            except KeyError:
+                steam_database[appID]['achievements'] = 0
+
+            steam_database[appID]['release_date'] = app_details['release_date']['date']
+
+            try:
+                steam_database[appID]['dlc'] = len(app_details['dlc'])
+            except KeyError:
+                steam_database[appID]['dlc'] = 0
+
+            steam_database[appID]['demos'] = bool('demos' in app_details)
+
+            try:
+                steam_database[appID]['controller_support'] = app_details['controller_support']
+            except KeyError:
+                steam_database[appID]['controller_support'] = None
+
+            try:
+                steam_database[appID]['drm_notice'] = app_details['drm_notice']
+            except KeyError:
+                steam_database[appID]['drm_notice'] = None
+
+            steam_database[appID]['ext_user_account_notice'] = bool('ext_user_account_notice' in app_details)
+
+    if verbose:
+        print('All possible pieces of information which can be fetched via Steam API:')
+        print('\n'.join(all_possible_info_type))
+        print()
+
+    return steam_database, all_categories, all_genres
+
+
 if __name__ == '__main__':
     scrape_steam_data()
+    (steamspy_database, categories, genres) = aggregate_steam_data()
+
+    print(categories)
+    print(genres)
