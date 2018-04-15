@@ -60,6 +60,8 @@ def scrape_steam_data():
 
     unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
+    unseen_app_ids = sorted(unseen_app_ids, key=lambda x: int(x))
+
     success_filename = get_previously_seen_app_ids_of_games()
     error_filename = get_previously_seen_app_ids_of_non_games()
 
