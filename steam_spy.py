@@ -192,10 +192,7 @@ def aggregate_steam_data(verbose=True):
 
             steam_database[appID]['demos'] = bool('demos' in app_details)
 
-            try:
-                steam_database[appID]['controller_support'] = app_details['controller_support']
-            except KeyError:
-                steam_database[appID]['controller_support'] = None
+            steam_database[appID]['controller_support'] = bool('controller_support' in app_details)
 
             try:
                 steam_database[appID]['drm_notice'] = app_details['drm_notice']
