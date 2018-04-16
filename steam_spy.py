@@ -161,11 +161,11 @@ def aggregate_steam_data(verbose=True):
                 steam_database[appID]['categories'] = []
 
             try:
-                steam_database[appID]['genres'] = [genre['id'] for genre in app_details['genres']]
+                steam_database[appID]['genres'] = [int(genre['id']) for genre in app_details['genres']]
 
                 d = {}
                 for elem in app_details['genres']:
-                    k = elem['id']
+                    k = int(elem['id'])
                     v = elem['description']
                     d[k] = v
                 all_genres.update(d)
