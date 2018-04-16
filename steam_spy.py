@@ -174,7 +174,7 @@ def aggregate_steam_data(verbose=True):
                 steam_database[appID]['genres'] = []
 
             try:
-                steam_database[appID]['recommendations'] = app_details['recommendations']
+                steam_database[appID]['recommendations'] = app_details['recommendations']['total']
             except KeyError:
                 steam_database[appID]['recommendations'] = 0
 
