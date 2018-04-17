@@ -211,6 +211,48 @@ def remove_current_date(release_calendar):
     return filtered_calendar
 
 
+def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, statistic_str='Median',
+                                                      description_keyword='achievements',
+                                                      legend_keyword=None):
+    if legend_keyword is None:
+        legend_keyword = 'number of ' + description_keyword
+
+    x = []
+    y = []
+
+    all_release_dates = sorted(list(release_calendar.keys()))
+
+    for release_date in all_release_dates:
+        app_ids = release_calendar[release_date]
+
+        descriptive_variable_of_interest = [int(steam_database[app_id][description_keyword]) for app_id in app_ids
+                                            if steam_database[app_id][description_keyword] is not None]
+        if len(descriptive_variable_of_interest) == 0:
+            continue
+
+        if statistic_str == 'Median':
+            value = np.median(descriptive_variable_of_interest)
+        else:
+            value = np.average(descriptive_variable_of_interest)
+
+        x.append(release_date)
+        y.append(value)
+
+    fig = Figure(dpi=300)
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
+
+    ax.plot(x, y)
+    ax.set_title(statistic_str + ' ' + legend_keyword + ' among monthly Steam releases')
+    ax.set_xlabel('Date')
+    ax.set_ylabel(statistic_str + ' ' + legend_keyword)
+
+    ax.grid()
+    base_plot_filename = statistic_str.lower() + '_num_' + description_keyword
+    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+
+    return
+
 if __name__ == '__main__':
     steamspy_database, categories, genres = load_aggregated_database()
 
@@ -227,3 +269,19 @@ if __name__ == '__main__':
     plot_time_series_price(steam_calendar, steamspy_database, 'Median')
 
     plot_time_series_price(steam_calendar, steamspy_database, 'Average')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'achievements')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'achievements')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'dlc')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'metacritic',
+                                                      'Metacritic score')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'metacritic',
+                                                      'Metacritic score')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'recommendations')
+
+    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'recommendations')
