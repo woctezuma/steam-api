@@ -323,65 +323,83 @@ def fill_in_drm_support(steam_database):
     return steam_database
 
 
-if __name__ == '__main__':
-    steamspy_database, categories, genres = load_aggregated_database()
+def plot_every_time_series_based_on_steam_calendar(release_calendar, steam_database):
+    plot_time_series_num_releases(release_calendar)
 
-    steamspy_database = fill_in_platform_support(steamspy_database)
+    plot_time_series_price(release_calendar, steam_database, 'Median')
 
-    steamspy_database = fill_in_drm_support(steamspy_database)
+    plot_time_series_price(release_calendar, steam_database, 'Average')
 
-    keywords = get_description_keywords(steamspy_database, verbose=True)
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'achievements')
 
-    steam_calendar, weird_dates = build_steam_calendar(steamspy_database, verbose=False)
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'achievements')
 
-    steam_calendar = simplify_calendar(steam_calendar)
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'dlc')
 
-    steam_calendar = remove_current_date(steam_calendar)
-
-    plot_time_series_num_releases(steam_calendar)
-
-    plot_time_series_price(steam_calendar, steamspy_database, 'Median')
-
-    plot_time_series_price(steam_calendar, steamspy_database, 'Average')
-
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'achievements')
-
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'achievements')
-
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'dlc')
-
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'metacritic',
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'metacritic',
                                                       'Metacritic score')
 
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'metacritic',
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'metacritic',
                                                       'Metacritic score')
 
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'recommendations')
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'recommendations')
 
-    plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'recommendations')
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'recommendations')
 
     sentence_prefixe = 'Proportion of games with '
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'controller_support',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'controller_support',
                                                       sentence_prefixe + 'controller support')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'demos',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'demos',
                                                       sentence_prefixe + 'a demo')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'ext_user_account_notice',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'ext_user_account_notice',
                                                       sentence_prefixe + '3rd-party account')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'required_age',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'required_age',
                                                       sentence_prefixe + 'age check')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'windows_support',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'windows_support',
                                                       sentence_prefixe + 'Windows support')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'mac_support',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'mac_support',
                                                       sentence_prefixe + 'Mac support')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'linux_support',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'linux_support',
                                                       sentence_prefixe + 'Linux support')
 
-    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'drm_support',
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'drm_support',
                                                       sentence_prefixe + '3rd-party DRM')
+
+    return
+
+
+def get_steam_database(verbosity=True):
+    steam_database, categories, genres = load_aggregated_database()
+
+    steam_database = fill_in_platform_support(steam_database)
+
+    steam_database = fill_in_drm_support(steam_database)
+
+    keywords = get_description_keywords(steamspy_database, verbose=verbosity)
+
+    return steam_database
+
+
+def get_steam_calendar(steam_database, verbosity=False):
+    release_calendar, weird_dates = build_steam_calendar(steam_database, verbose=verbosity)
+
+    release_calendar = simplify_calendar(release_calendar)
+
+    release_calendar = remove_current_date(release_calendar)
+
+    return release_calendar
+
+
+if __name__ == '__main__':
+    steamspy_database = get_steam_database()
+
+    steam_calendar = get_steam_calendar(steamspy_database)
+
+    plot_every_time_series_based_on_steam_calendar(steam_calendar, steamspy_database)
