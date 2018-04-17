@@ -132,7 +132,7 @@ def get_x_y_time_series(release_calendar,
         x_list.append(release_date)
         y_raw_list.append(selected_app_ids)
 
-    return (x_list, y_raw_list)
+    return x_list, y_raw_list
 
 
 def plot_x_y_time_series(x_list, y_list,
@@ -158,7 +158,7 @@ def plot_x_y_time_series(x_list, y_list,
 
     ax.grid()
 
-    if not (is_variable_of_interest_numeric):
+    if not is_variable_of_interest_numeric:
         if max_ordinate is None:
             max_ordinate = np.min([1.0, np.max(y_list) * 1.1])
         ax.set_ylim(0, max_ordinate)
@@ -222,20 +222,26 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
     for app_ids in y_raw:
         if description_keyword is not None:
             if is_variable_of_interest_numeric:
+                # noinspection PyPep8
                 g = lambda v: int(v)
             else:
+                # noinspection PyPep8
                 g = lambda v: generic_converter(v)
             features = [g(steam_database[app_id][description_keyword]) for app_id in app_ids]
         else:
             features = app_ids
 
         if statistic_str == 'Median':
+            # noinspection PyPep8
             f = lambda v: np.median(v)
         elif statistic_str == 'Average':
+            # noinspection PyPep8
             f = lambda v: np.average(v)
         elif statistic_str == 'Sum':
+            # noinspection PyPep8
             f = lambda v: np.sum(v)
         else:
+            # noinspection PyPep8
             f = lambda v: len(v)
 
         value = f(features)
