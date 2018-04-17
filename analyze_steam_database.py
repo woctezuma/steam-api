@@ -1,8 +1,10 @@
 import datetime
 import pathlib
 
-import matplotlib.pyplot as plt
 import numpy as np
+# Reference: https://stackoverflow.com/a/3054314
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from json_data_utils import load_data
 from steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
@@ -115,18 +117,18 @@ def plot_time_series_num_releases(release_calendar):
         x.append(release_date)
         y.append(value)
 
-    fig, ax = plt.subplots(dpi=300)
+    fig = Figure(dpi=300)
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
 
-    plt.plot(x, y)
-    plt.title('Number of games released on Steam each month')
-    plt.xlabel('Date')
-    plt.ylabel('Number of game releases')
+    ax.plot(x, y)
+    ax.set_title('Number of games released on Steam each month')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Number of game releases')
 
-    plt.tight_layout()
-    plt.grid()
+    ax.grid()
     base_plot_filename = 'num_releases'
     fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
-    plt.close(fig)
 
     return
 
@@ -156,18 +158,18 @@ def plot_time_series_price(release_calendar, steam_database, statistic_str='Medi
         x.append(release_date)
         y.append(value)
 
-    fig, ax = plt.subplots(dpi=300)
+    fig = Figure(dpi=300)
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
 
-    plt.plot(x, y)
-    plt.title(statistic_str + ' price of games released on Steam each month')
-    plt.xlabel('Date')
-    plt.ylabel(statistic_str + ' price (in €)')
+    ax.plot(x, y)
+    ax.set_title(statistic_str + ' price of games released on Steam each month')
+    ax.set_xlabel('Date')
+    ax.set_ylabel(statistic_str + ' price (in €)')
 
-    plt.tight_layout()
-    plt.grid()
+    ax.grid()
     base_plot_filename = statistic_str.lower() + '_price'
     fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
-    plt.close(fig)
 
     return
 
