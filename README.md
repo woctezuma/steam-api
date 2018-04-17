@@ -6,3 +6,5 @@
 This repository contains Python code to download data through Steam API.
 
 Data is available as a snapshot in [another repository](https://github.com/woctezuma/steam-api-data).
+
+Output can be found in [`plots/`](plots/).
