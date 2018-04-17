@@ -173,6 +173,8 @@ def plot_time_series_price(release_calendar, steam_database, statistic_str='Medi
 
 
 def simplify_calendar(release_calendar):
+    # Objective: merge daily dates into monthly dates
+
     merged_calendar = dict()
     for release_date in release_calendar:
         merged_release_date = datetime.date(release_date.year, release_date.month, 1)
@@ -185,6 +187,8 @@ def simplify_calendar(release_calendar):
 
 
 def remove_current_date(release_calendar):
+    # Objective: remove partial data just before plotting time-series
+
     now = datetime.datetime.now()
 
     this_day = datetime.date(now.year, now.month, now.day)
@@ -216,11 +220,8 @@ if __name__ == '__main__':
 
     steam_calendar = remove_current_date(steam_calendar)
 
-    plot_to_screen = True
+    plot_time_series_num_releases(steam_calendar)
 
-    if plot_to_screen:
-        plot_time_series_num_releases(steam_calendar)
+    plot_time_series_price(steam_calendar, steamspy_database, 'Median')
 
-        plot_time_series_price(steam_calendar, steamspy_database, 'Median')
-
-        plot_time_series_price(steam_calendar, steamspy_database, 'Average')
+    plot_time_series_price(steam_calendar, steamspy_database, 'Average')
