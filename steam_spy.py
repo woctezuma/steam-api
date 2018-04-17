@@ -183,7 +183,10 @@ def aggregate_steam_data(verbose=True):
             except KeyError:
                 steam_database[appID]['achievements'] = 0
 
-            steam_database[appID]['release_date'] = app_details['release_date']['date']
+            release_info = app_details['release_date']
+            steam_database[appID]['release_date'] = {}
+            steam_database[appID]['release_date']['date'] = release_info['date']
+            steam_database[appID]['release_date']['is_released'] = not (release_info['coming_soon'])
 
             try:
                 steam_database[appID]['dlc'] = len(app_details['dlc'])

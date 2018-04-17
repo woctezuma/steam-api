@@ -35,7 +35,10 @@ def build_steam_calendar(steam_database, verbose=False):
     weird_counter = 0
 
     for appID in steam_database:
-        release_date_as_str = steam_database[appID]['release_date']
+        release_info = steam_database[appID]['release_date']
+
+        is_released = release_info['is_released']
+        release_date_as_str = release_info['date']
 
         if len(release_date_as_str) == 0:
             continue
