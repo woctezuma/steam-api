@@ -104,73 +104,110 @@ def get_full_plot_filename(base_plot_filename):
     return full_plot_filename
 
 
-def plot_time_series_num_releases(release_calendar):
-    x = []
-    y = []
+def get_x_y_time_series(release_calendar,
+                        steam_database=None,
+                        description_keyword=None,
+                        starting_year=None):
+    x_list = []
+    y_raw_list = []
 
     all_release_dates = sorted(list(release_calendar.keys()))
 
     for release_date in all_release_dates:
+
+        if starting_year is not None and release_date.year < starting_year:
+            # Skip release dates prior to the input starting year
+            continue
+
         app_ids = release_calendar[release_date]
 
-        value = len(app_ids)
+        if description_keyword is None:
+            selected_app_ids = app_ids
+        else:
+            selected_app_ids = [app_id for app_id in app_ids if steam_database[app_id][description_keyword] is not None]
 
-        x.append(release_date)
-        y.append(value)
+        if len(selected_app_ids) == 0:
+            continue
 
+        x_list.append(release_date)
+        y_raw_list.append(selected_app_ids)
+
+    return (x_list, y_raw_list)
+
+
+def plot_x_y_time_series(x_list, y_list,
+                         chosen_title=None,
+                         chosen_ylabel=None,
+                         base_plot_filename=None,
+                         month_formatting=False):
     fig = Figure(dpi=300)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
 
-    ax.plot(x, y)
-    ax.set_title('Number of games released on Steam each month')
+    ax.plot(x_list, y_list)
+    if chosen_title is not None:
+        ax.set_title(chosen_title)
     ax.set_xlabel('Date')
-    ax.set_ylabel('Number of game releases')
+    if chosen_ylabel is not None:
+        ax.set_ylabel(chosen_ylabel)
+
+    if month_formatting:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 
     ax.grid()
-    base_plot_filename = 'num_releases'
-    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+
+    if base_plot_filename is not None:
+        fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+
+    return
+
+
+def plot_time_series_num_releases(release_calendar):
+    (x, y_raw) = get_x_y_time_series(release_calendar)
+
+    y = []
+    for app_ids in y_raw:
+        value = len(app_ids)
+        y.append(value)
+
+    my_title = 'Number of games released on Steam each month'
+    my_ylabel = 'Number of game releases'
+    my_plot_filename = 'num_releases'
+
+    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename)
 
     return
 
 
 def plot_time_series_price(release_calendar, steam_database, statistic_str='Median'):
-    x = []
+    keyword = 'price_overview'
+
+    (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, keyword)
+
     y = []
-
-    all_release_dates = sorted(list(release_calendar.keys()))
-
-    for release_date in all_release_dates:
-        app_ids = release_calendar[release_date]
-
-        prices_in_cents = [steam_database[app_id]['price_overview'] for app_id in app_ids
-                           if steam_database[app_id]['price_overview'] is not None]
-        if len(prices_in_cents) == 0:
-            continue
+    for app_ids in y_raw:
+        features = [steam_database[app_id][keyword] for app_id in app_ids]
 
         if statistic_str == 'Median':
-            price_summary_in_cents = np.median(prices_in_cents)
+            f = lambda x: np.median(x)
+        elif statistic_str == 'Average':
+            f = lambda x: np.average(x)
         else:
-            price_summary_in_cents = np.average(prices_in_cents)
+            f = lambda x: np.sum(x)
 
-        price_summary_in_euros = price_summary_in_cents / 100
-        value = price_summary_in_euros
+        value = f(features)
 
-        x.append(release_date)
+        if keyword == 'price_overview':
+            # Convert from cents to euros
+            value = value / 100
+
         y.append(value)
 
-    fig = Figure(dpi=300)
-    FigureCanvas(fig)
-    ax = fig.add_subplot(111)
+    my_title = statistic_str + ' price of games released on Steam each month'
+    my_ylabel = statistic_str + ' price (in €)'
+    my_plot_filename = statistic_str.lower() + '_price'
 
-    ax.plot(x, y)
-    ax.set_title(statistic_str + ' price of games released on Steam each month')
-    ax.set_xlabel('Date')
-    ax.set_ylabel(statistic_str + ' price (in €)')
-
-    ax.grid()
-    base_plot_filename = statistic_str.lower() + '_price'
-    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename)
 
     return
 
@@ -216,60 +253,50 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
                                                       description_keyword='achievements',
                                                       legend_keyword=None,
                                                       starting_year=None):
-    if legend_keyword is None:
-        legend_keyword = 'number of ' + description_keyword
+    (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, description_keyword, starting_year)
 
-    x = []
     y = []
-
-    all_release_dates = sorted(list(release_calendar.keys()))
-
-    for release_date in all_release_dates:
-        app_ids = release_calendar[release_date]
-
-        if starting_year is not None and release_date.year < starting_year:
-            # Skip release dates prior to the input starting year
-            continue
-
-        descriptive_variable_of_interest = [int(steam_database[app_id][description_keyword]) for app_id in app_ids
-                                            if steam_database[app_id][description_keyword] is not None]
-        if len(descriptive_variable_of_interest) == 0:
-            continue
+    for app_ids in y_raw:
+        features = [int(steam_database[app_id][description_keyword]) for app_id in app_ids]
 
         if statistic_str == 'Median':
-            value = np.median(descriptive_variable_of_interest)
+            f = lambda x: np.median(x)
         elif statistic_str == 'Average':
-            value = np.average(descriptive_variable_of_interest)
+            f = lambda x: np.average(x)
         else:
-            value = np.sum(descriptive_variable_of_interest)
+            f = lambda x: np.sum(x)
 
-        x.append(release_date)
+        value = f(features)
+
+        if description_keyword == 'price_overview':
+            # Convert from cents to euros
+            value = value / 100
+
         y.append(value)
 
-    fig = Figure(dpi=300)
-    FigureCanvas(fig)
-    ax = fig.add_subplot(111)
-
-    if statistic_str == 'Median' or statistic_str == 'Average':
-        statistic_legend = statistic_str + ' '
+    if description_keyword == 'price_overview':
+        my_title = statistic_str + ' price of games released on Steam each month'
+        my_ylabel = statistic_str + ' price (in €)'
+        my_plot_filename = statistic_str.lower() + '_price'
     else:
-        statistic_legend = ''
+        if statistic_str == 'Median' or statistic_str == 'Average':
+            statistic_legend = statistic_str + ' '
+        else:
+            statistic_legend = ''
 
-    ax.plot(x, y)
-    ax.set_title(statistic_legend + legend_keyword + ' among monthly Steam releases')
-    ax.set_xlabel('Date')
-    ax.set_ylabel(statistic_legend + legend_keyword)
+        if legend_keyword is None:
+            legend_keyword = 'number of ' + description_keyword
+
+        my_title = statistic_legend + legend_keyword + ' among monthly Steam releases'
+        my_ylabel = statistic_legend + legend_keyword
+        my_plot_filename = statistic_str.lower() + '_num_' + description_keyword
 
     if starting_year is not None:
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
+        my_plot_filename = my_plot_filename + '_from_' + str(starting_year)
 
-    ax.grid()
-    base_plot_filename = statistic_str.lower() + '_num_' + description_keyword
+    month_formatting = bool(starting_year is not None)
 
-    if starting_year is not None:
-        base_plot_filename = base_plot_filename + '_from_' + str(starting_year)
-
-    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename, month_formatting)
 
     return
 
