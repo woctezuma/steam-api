@@ -293,7 +293,7 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
                                                       starting_year=None,
                                                       is_variable_of_interest_numeric=True,
                                                       max_ordinate=None,
-                                                      plot_confidence_interval_if_possible=False):
+                                                      plot_confidence_interval_if_possible=True):
     # Get x: dates and y: a set of appIDs of games released for each date in x
     (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, description_keyword, starting_year)
 
