@@ -298,6 +298,7 @@ def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_da
     ax.set_title(legend_keyword + ' among monthly Steam releases')
     ax.set_xlabel('Date')
     ax.set_ylabel(legend_keyword)
+    ax.set_ylim(0, 1)
 
     ax.grid()
     base_plot_filename = 'proportion_' + description_keyword
