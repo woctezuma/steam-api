@@ -6,7 +6,7 @@
 ![Average number of recommendations](average_num_recommendations.png)
 ![Average price](average_price.png)
 ![Median number of achievements](median_num_achievements.png)
-![Median number of DLC](median_num_metacritic.png)
+![Median Metacritic score](median_num_metacritic.png)
 ![Median number of recommendations](median_num_recommendations.png)
 ![Median price](median_price.png)
 ![Number of game releases](num_releases.png)
