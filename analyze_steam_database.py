@@ -151,11 +151,11 @@ def plot_x_y_time_series(x_list, y_list,
     if confidence_interval_data is None or len(confidence_interval_data) == 0:
         ax.plot(x_list, y_list)
     else:
-        plot_mean_and_CI(ax,
-                         confidence_interval_data['mean'],
-                         confidence_interval_data['lb'],
-                         confidence_interval_data['ub'],
-                         x_list)
+        plot_mean_and_confidence_interval(ax,
+                                          confidence_interval_data['mean'],
+                                          confidence_interval_data['lb'],
+                                          confidence_interval_data['ub'],
+                                          x_list)
     if chosen_title is not None:
         ax.set_title(chosen_title)
     ax.set_xlabel('Date')
@@ -219,7 +219,7 @@ def remove_current_date(release_calendar):
     return filtered_calendar
 
 
-def plot_mean_and_CI(ax, mean, lb, ub, x_tick_as_dates=None, color_mean=None, color_shading=None):
+def plot_mean_and_confidence_interval(ax, mean, lb, ub, x_tick_as_dates=None, color_mean=None, color_shading=None):
     # Reference: plot_mean_and_CI() in https://github.com/woctezuma/humble-monthly/blob/master/plot_time_series.py
     # Reference: https://studywolf.wordpress.com/2017/11/21/matplotlib-legends-for-mean-and-confidence-interval-plots/
 
@@ -282,7 +282,7 @@ def get_mean_and_confidence_interval(x_list, is_variable_of_interest_numeric=Tru
         ub = None
         lb = None
 
-    return (mean, lb, ub)
+    return mean, lb, ub
 
 
 def plot_time_series_for_numeric_variable_of_interest(release_calendar,
