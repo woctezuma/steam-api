@@ -1,5 +1,6 @@
 import datetime
 import pathlib
+from math import sqrt
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -141,12 +142,20 @@ def plot_x_y_time_series(x_list, y_list,
                          base_plot_filename=None,
                          month_formatting=False,
                          is_variable_of_interest_numeric=True,
-                         max_ordinate=None):
+                         max_ordinate=None,
+                         confidence_interval_data=None):
     fig = Figure(dpi=300)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
 
-    ax.plot(x_list, y_list)
+    if confidence_interval_data is None or len(confidence_interval_data) == 0:
+        ax.plot(x_list, y_list)
+    else:
+        plot_mean_and_CI(ax,
+                         confidence_interval_data['mean'],
+                         confidence_interval_data['lb'],
+                         confidence_interval_data['ub'],
+                         x_list)
     if chosen_title is not None:
         ax.set_title(chosen_title)
     ax.set_xlabel('Date')
@@ -160,7 +169,11 @@ def plot_x_y_time_series(x_list, y_list,
 
     if not is_variable_of_interest_numeric:
         if max_ordinate is None:
-            max_ordinate = np.min([1.0, np.max(y_list) * 1.1])
+            if confidence_interval_data is None or len(confidence_interval_data) == 0:
+                vec_reference = y_list
+            else:
+                vec_reference = confidence_interval_data['ub']
+            max_ordinate = np.min([1.0, np.max(vec_reference) * 1.1])
         ax.set_ylim(0, max_ordinate)
 
     if base_plot_filename is not None:
@@ -206,6 +219,72 @@ def remove_current_date(release_calendar):
     return filtered_calendar
 
 
+def plot_mean_and_CI(ax, mean, lb, ub, x_tick_as_dates=None, color_mean=None, color_shading=None):
+    # Reference: plot_mean_and_CI() in https://github.com/woctezuma/humble-monthly/blob/master/plot_time_series.py
+    # Reference: https://studywolf.wordpress.com/2017/11/21/matplotlib-legends-for-mean-and-confidence-interval-plots/
+
+    if color_shading is None:
+        color_shading = 'b'
+
+    if color_mean is None:
+        dotted_color = color_shading + '--'
+        color_mean = dotted_color
+
+    if x_tick_as_dates is None:
+        x_tick_as_dates = range(mean.shape[0])
+
+    # plot the shaded range of the confidence intervals
+    ax.fill_between(x_tick_as_dates, ub, lb,
+                    color=color_shading, alpha=.5)
+    # plot the mean on top
+    ax.plot(x_tick_as_dates, mean, color_mean)
+
+    return
+
+
+def get_mean_and_confidence_interval(x_list, is_variable_of_interest_numeric=True):
+    # Reference: plot_time_series() in https://github.com/woctezuma/humble-monthly/blob/master/plot_time_series.py
+
+    x_vec = np.array([np.array(xi) for xi in x_list])
+
+    mean = np.array([np.mean(xi) for xi in x_vec])
+
+    # 0.95-Quantile of the normal distribution
+    # Reference: https://en.wikipedia.org/wiki/Normal_distribution
+    z_quantile = 1.95996398454
+
+    try:
+        if is_variable_of_interest_numeric:
+            sig = np.array([np.std(xi) / np.sqrt(len(xi)) for xi in x_vec])
+
+            confidence_factor = z_quantile
+            ub = mean + confidence_factor * sig
+            lb = mean - confidence_factor * sig
+        else:
+            # Reference:
+            # computeWilsonScore() in https://github.com/woctezuma/hidden-gems/blob/master/compute_wilson_score.py
+
+            num_pos = np.array([np.sum(xi) for xi in x_vec])
+            num_neg = np.array([len(xi) - np.sum(xi) for xi in x_vec])
+
+            z2 = pow(z_quantile, 2)
+            den = num_pos + num_neg + z2
+
+            mean = (num_pos + z2 / 2) / den
+
+            inside_sqrt = num_pos * num_neg / (num_pos + num_neg) + z2 / 4
+            temp = np.array([sqrt(i) for i in inside_sqrt])
+            delta = (z_quantile * temp) / den
+            ub = mean + delta
+            lb = mean - delta
+
+    except TypeError:
+        ub = None
+        lb = None
+
+    return (mean, lb, ub)
+
+
 def plot_time_series_for_numeric_variable_of_interest(release_calendar,
                                                       steam_database=None,
                                                       statistic_str=None,
@@ -213,12 +292,13 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
                                                       legend_keyword=None,
                                                       starting_year=None,
                                                       is_variable_of_interest_numeric=True,
-                                                      max_ordinate=None):
+                                                      max_ordinate=None,
+                                                      plot_confidence_interval_if_possible=False):
     # Get x: dates and y: a set of appIDs of games released for each date in x
     (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, description_keyword, starting_year)
 
     # Compute the value of interest y from y_raw
-    y = []
+    feature_list = []
     for app_ids in y_raw:
         if description_keyword is not None:
             if is_variable_of_interest_numeric:
@@ -231,19 +311,33 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
         else:
             features = app_ids
 
-        if statistic_str == 'Median':
-            # noinspection PyPep8
-            f = lambda v: np.median(v)
-        elif statistic_str == 'Average':
-            # noinspection PyPep8
-            f = lambda v: np.average(v)
-        elif statistic_str == 'Sum':
-            # noinspection PyPep8
-            f = lambda v: np.sum(v)
-        else:
-            # noinspection PyPep8
-            f = lambda v: len(v)
+        feature_list.append(features)
 
+    confidence_interval_data = {}
+    if plot_confidence_interval_if_possible and statistic_str is not None and statistic_str != 'Median':
+        (mean, lb, ub) = get_mean_and_confidence_interval(feature_list, is_variable_of_interest_numeric)
+        # Thresholding of lower-bound of confidence interval so that it is non-negative
+        lb = np.array([max(i, 0) for i in lb])
+
+        confidence_interval_data['mean'] = mean
+        confidence_interval_data['lb'] = lb
+        confidence_interval_data['ub'] = ub
+
+    if statistic_str == 'Median':
+        # noinspection PyPep8
+        f = lambda v: np.median(v)
+    elif statistic_str == 'Average':
+        # noinspection PyPep8
+        f = lambda v: np.mean(v)
+    elif statistic_str == 'Sum':
+        # noinspection PyPep8
+        f = lambda v: np.sum(v)
+    else:
+        # noinspection PyPep8
+        f = lambda v: len(v)
+
+    y = []
+    for features in feature_list:
         value = f(features)
 
         if description_keyword == 'price_overview':
@@ -251,6 +345,11 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
             value = value / 100
 
         y.append(value)
+
+    if description_keyword == 'price_overview':
+        # Convert from cents to euros
+        for entry in confidence_interval_data:
+            confidence_interval_data[entry] = np.array([i / 100 for i in confidence_interval_data[entry]])
 
     # Plot legend
     if description_keyword is None:
@@ -290,7 +389,7 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
 
     # Plot
     plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename, month_formatting, is_variable_of_interest_numeric,
-                         max_ordinate)
+                         max_ordinate, confidence_interval_data)
 
     return
 
