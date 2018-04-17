@@ -516,6 +516,81 @@ def plot_durante_request(release_calendar, steam_database):
     return
 
 
+def get_dict_value_as_keyword(dictionary, selected_key):
+    keyword = dictionary[selected_key]
+    keyword = keyword.replace(' ', '_')
+    keyword = keyword.replace('/', '_')
+
+    return keyword
+
+
+def fill_in_categorie(steam_database, categorie_keyword, categorie_index):
+    for app_id in steam_database:
+        steam_database[app_id][categorie_keyword] = bool(int(categorie_index) in steam_database[app_id]['categories'])
+
+    return steam_database
+
+
+def fill_in_genre(steam_database, genre_keyword, genre_index):
+    for app_id in steam_database:
+        steam_database[app_id][genre_keyword] = bool(int(genre_index) in steam_database[app_id]['genres'])
+
+    return steam_database
+
+
+def plot_time_series_categorie(release_calendar, steam_database, all_categories, selected_categorie_index):
+    selected_categorie_keyword = get_dict_value_as_keyword(all_categories, selected_categorie_index)
+
+    steam_database = fill_in_categorie(steam_database, selected_categorie_keyword, selected_categorie_index)
+
+    chosen_legend_keyword = 'Proportion of categorie ' + all_categories[selected_categorie_index]
+    chosen_starting_year = 2009
+    chosen_max_ordinate = None
+
+    # noinspection PyTypeChecker
+    plot_time_series_for_boolean_variable_of_interest(release_calendar,
+                                                      steam_database,
+                                                      selected_categorie_keyword,
+                                                      chosen_legend_keyword,
+                                                      chosen_starting_year,
+                                                      chosen_max_ordinate)
+
+    return
+
+
+def plot_time_series_genre(release_calendar, steam_database, all_genres, selected_genre_index):
+    selected_genre_keyword = get_dict_value_as_keyword(all_genres, selected_genre_index)
+
+    steam_database = fill_in_genre(steam_database, selected_genre_keyword, selected_genre_index)
+
+    chosen_legend_keyword = 'Proportion of genre ' + all_genres[selected_genre_index]
+    chosen_starting_year = 2009
+    chosen_max_ordinate = None
+
+    # noinspection PyTypeChecker
+    plot_time_series_for_boolean_variable_of_interest(release_calendar,
+                                                      steam_database,
+                                                      selected_genre_keyword,
+                                                      chosen_legend_keyword,
+                                                      chosen_starting_year,
+                                                      chosen_max_ordinate)
+
+    return
+
+
+def plot_every_time_series_based_on_categories_and_genres(release_calendar, steam_database,
+                                                          all_categories_dict, all_genres_dict):
+    for categorie_key in all_categories_dict:
+        print(all_categories_dict[categorie_key])
+        plot_time_series_categorie(release_calendar, steam_database, all_categories_dict, categorie_key)
+
+    for genre_key in all_genres_dict:
+        print(all_genres_dict[genre_key])
+        plot_time_series_genre(release_calendar, steam_database, all_genres_dict, genre_key)
+
+    return
+
+
 def get_steam_database(verbosity=True):
     steam_database, categories, genres = load_aggregated_database()
 
@@ -540,10 +615,13 @@ def get_steam_calendar(steam_database, verbosity=False):
 
 
 if __name__ == '__main__':
-    steamspy_database, categorie_dict, genre_dict = get_steam_database()
+    steamspy_database, all_categories_dict, all_genres_dict = get_steam_database()
 
     steam_calendar = get_steam_calendar(steamspy_database)
 
     plot_every_time_series_based_on_steam_calendar(steam_calendar, steamspy_database)
 
     plot_durante_request(steam_calendar, steamspy_database)
+
+    plot_every_time_series_based_on_categories_and_genres(steam_calendar, steamspy_database, all_categories_dict,
+                                                          all_genres_dict)
