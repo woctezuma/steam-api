@@ -139,7 +139,9 @@ def plot_x_y_time_series(x_list, y_list,
                          chosen_title=None,
                          chosen_ylabel=None,
                          base_plot_filename=None,
-                         month_formatting=False):
+                         month_formatting=False,
+                         is_variable_of_interest_numeric=True,
+                         max_ordinate=None):
     fig = Figure(dpi=300)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
@@ -156,58 +158,13 @@ def plot_x_y_time_series(x_list, y_list,
 
     ax.grid()
 
+    if not (is_variable_of_interest_numeric):
+        if max_ordinate is None:
+            max_ordinate = np.min([1.0, np.max(y_list) * 1.1])
+        ax.set_ylim(0, max_ordinate)
+
     if base_plot_filename is not None:
         fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
-
-    return
-
-
-def plot_time_series_num_releases(release_calendar):
-    (x, y_raw) = get_x_y_time_series(release_calendar)
-
-    y = []
-    for app_ids in y_raw:
-        value = len(app_ids)
-        y.append(value)
-
-    my_title = 'Number of games released on Steam each month'
-    my_ylabel = 'Number of game releases'
-    my_plot_filename = 'num_releases'
-
-    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename)
-
-    return
-
-
-def plot_time_series_price(release_calendar, steam_database, statistic_str='Median'):
-    keyword = 'price_overview'
-
-    (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, keyword)
-
-    y = []
-    for app_ids in y_raw:
-        features = [steam_database[app_id][keyword] for app_id in app_ids]
-
-        if statistic_str == 'Median':
-            f = lambda x: np.median(x)
-        elif statistic_str == 'Average':
-            f = lambda x: np.average(x)
-        else:
-            f = lambda x: np.sum(x)
-
-        value = f(features)
-
-        if keyword == 'price_overview':
-            # Convert from cents to euros
-            value = value / 100
-
-        y.append(value)
-
-    my_title = statistic_str + ' price of games released on Steam each month'
-    my_ylabel = statistic_str + ' price (in €)'
-    my_plot_filename = statistic_str.lower() + '_price'
-
-    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename)
 
     return
 
@@ -249,22 +206,37 @@ def remove_current_date(release_calendar):
     return filtered_calendar
 
 
-def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, statistic_str='Median',
-                                                      description_keyword='achievements',
+def plot_time_series_for_numeric_variable_of_interest(release_calendar,
+                                                      steam_database=None,
+                                                      statistic_str=None,
+                                                      description_keyword=None,
                                                       legend_keyword=None,
-                                                      starting_year=None):
+                                                      starting_year=None,
+                                                      is_variable_of_interest_numeric=True,
+                                                      max_ordinate=None):
+    # Get x: dates and y: a set of appIDs of games released for each date in x
     (x, y_raw) = get_x_y_time_series(release_calendar, steamspy_database, description_keyword, starting_year)
 
+    # Compute the value of interest y from y_raw
     y = []
     for app_ids in y_raw:
-        features = [int(steam_database[app_id][description_keyword]) for app_id in app_ids]
+        if description_keyword is not None:
+            if is_variable_of_interest_numeric:
+                g = lambda v: int(v)
+            else:
+                g = lambda v: generic_converter(v)
+            features = [g(steam_database[app_id][description_keyword]) for app_id in app_ids]
+        else:
+            features = app_ids
 
         if statistic_str == 'Median':
-            f = lambda x: np.median(x)
+            f = lambda v: np.median(v)
         elif statistic_str == 'Average':
-            f = lambda x: np.average(x)
+            f = lambda v: np.average(v)
+        elif statistic_str == 'Sum':
+            f = lambda v: np.sum(v)
         else:
-            f = lambda x: np.sum(x)
+            f = lambda v: len(v)
 
         value = f(features)
 
@@ -274,29 +246,45 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
 
         y.append(value)
 
-    if description_keyword == 'price_overview':
+    # Plot legend
+    if description_keyword is None:
+        my_title = 'Number of games released on Steam each month'
+        my_ylabel = 'Number of game releases'
+        my_plot_filename = 'num_releases'
+    elif description_keyword == 'price_overview':
         my_title = statistic_str + ' price of games released on Steam each month'
         my_ylabel = statistic_str + ' price (in €)'
         my_plot_filename = statistic_str.lower() + '_price'
     else:
-        if statistic_str == 'Median' or statistic_str == 'Average':
+        if is_variable_of_interest_numeric and (statistic_str == 'Median' or statistic_str == 'Average'):
             statistic_legend = statistic_str + ' '
         else:
             statistic_legend = ''
 
         if legend_keyword is None:
-            legend_keyword = 'number of ' + description_keyword
+            if is_variable_of_interest_numeric:
+                legend_keyword = 'number of ' + description_keyword
+            else:
+                sentence_prefixe_for_proportion = 'Proportion of games with '
+                legend_keyword = sentence_prefixe_for_proportion + description_keyword
 
         my_title = statistic_legend + legend_keyword + ' among monthly Steam releases'
         my_ylabel = statistic_legend + legend_keyword
-        my_plot_filename = statistic_str.lower() + '_num_' + description_keyword
+        if is_variable_of_interest_numeric:
+            my_plot_filename = 'num_' + description_keyword
+            if len(statistic_str) > 0:
+                my_plot_filename = statistic_str.lower() + '_' + my_plot_filename
+        else:
+            my_plot_filename = 'proportion_' + description_keyword
 
     if starting_year is not None:
         my_plot_filename = my_plot_filename + '_from_' + str(starting_year)
 
     month_formatting = bool(starting_year is not None)
 
-    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename, month_formatting)
+    # Plot
+    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename, month_formatting, is_variable_of_interest_numeric,
+                         max_ordinate)
 
     return
 
@@ -311,61 +299,23 @@ def generic_converter(my_boolean):
     return x
 
 
-def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database,
+def plot_time_series_for_boolean_variable_of_interest(release_calendar,
+                                                      steam_database,
                                                       description_keyword='controller_support',
                                                       legend_keyword=None,
                                                       starting_year=None,
                                                       max_ordinate=1.0):
-    if legend_keyword is None:
-        sentence_prefixe_for_proportion = 'Proportion of games with '
-        legend_keyword = sentence_prefixe_for_proportion + description_keyword
+    statistic_str = 'Average'
+    is_variable_of_interest_numeric = False
 
-    x = []
-    y = []
-
-    all_release_dates = sorted(list(release_calendar.keys()))
-
-    for release_date in all_release_dates:
-        app_ids = release_calendar[release_date]
-
-        if starting_year is not None and release_date.year < starting_year:
-            # Skip release dates prior to the input starting year
-            continue
-
-        descriptive_variable_of_interest = [generic_converter(steam_database[app_id][description_keyword])
-                                            for app_id in app_ids
-                                            if steam_database[app_id][description_keyword] is not None]
-        if len(descriptive_variable_of_interest) == 0:
-            continue
-
-        value = np.average(descriptive_variable_of_interest)
-
-        x.append(release_date)
-        y.append(value)
-
-    if max_ordinate is None:
-        max_ordinate = np.min([1.0, np.max(y) * 1.1])
-
-    fig = Figure(dpi=300)
-    FigureCanvas(fig)
-    ax = fig.add_subplot(111)
-
-    ax.plot(x, y)
-    ax.set_title(legend_keyword + ' among monthly Steam releases')
-    ax.set_xlabel('Date')
-    ax.set_ylabel(legend_keyword)
-    ax.set_ylim(0, max_ordinate)
-
-    if starting_year is not None:
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
-
-    ax.grid()
-    base_plot_filename = 'proportion_' + description_keyword
-
-    if starting_year is not None:
-        base_plot_filename = base_plot_filename + '_from_' + str(starting_year)
-
-    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+    plot_time_series_for_numeric_variable_of_interest(release_calendar,
+                                                      steam_database,
+                                                      statistic_str,
+                                                      description_keyword,
+                                                      legend_keyword,
+                                                      starting_year,
+                                                      is_variable_of_interest_numeric,
+                                                      max_ordinate)
 
     return
 
@@ -387,11 +337,11 @@ def fill_in_drm_support(steam_database):
 
 
 def plot_every_time_series_based_on_steam_calendar(release_calendar, steam_database):
-    plot_time_series_num_releases(release_calendar)
+    plot_time_series_for_numeric_variable_of_interest(release_calendar)  # Plot number of releases
 
-    plot_time_series_price(release_calendar, steam_database, 'Median')
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'price_overview')
 
-    plot_time_series_price(release_calendar, steam_database, 'Average')
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'price_overview')
 
     plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'achievements')
 
