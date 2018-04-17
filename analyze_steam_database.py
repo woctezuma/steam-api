@@ -526,7 +526,7 @@ def get_steam_database(verbosity=True):
     # noinspection PyUnusedLocal
     keywords = get_description_keywords(steam_database, verbose=verbosity)
 
-    return steam_database
+    return steam_database, categories, genres
 
 
 def get_steam_calendar(steam_database, verbosity=False):
@@ -540,7 +540,7 @@ def get_steam_calendar(steam_database, verbosity=False):
 
 
 if __name__ == '__main__':
-    steamspy_database = get_steam_database()
+    steamspy_database, categorie_dict, genre_dict = get_steam_database()
 
     steam_calendar = get_steam_calendar(steamspy_database)
 
