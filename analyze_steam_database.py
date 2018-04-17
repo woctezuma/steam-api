@@ -382,6 +382,7 @@ def get_steam_database(verbosity=True):
 
     steam_database = fill_in_drm_support(steam_database)
 
+    # noinspection PyUnusedLocal
     keywords = get_description_keywords(steam_database, verbose=verbosity)
 
     return steam_database
