@@ -253,8 +253,72 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
 
     return
 
+
+def generic_converter(my_boolean):
+    # Objective: output either 0 or 1, with an input which is likely a boolean, but might be a str or an int.
+
+    # Convert boolean to int
+    x = int(my_boolean)
+    # If my_boolean was a str or an int, then x is now an int, which we binarize.
+    x = int(x > 0)
+    return x
+
+
+def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database,
+                                                      description_keyword='controller_support',
+                                                      legend_keyword=None):
+    if legend_keyword is None:
+        sentence_prefixe_for_proportion = 'Proportion of games with '
+        legend_keyword = sentence_prefixe_for_proportion + description_keyword
+
+    x = []
+    y = []
+
+    all_release_dates = sorted(list(release_calendar.keys()))
+
+    for release_date in all_release_dates:
+        app_ids = release_calendar[release_date]
+
+        descriptive_variable_of_interest = [generic_converter(steam_database[app_id][description_keyword])
+                                            for app_id in app_ids
+                                            if steam_database[app_id][description_keyword] is not None]
+        if len(descriptive_variable_of_interest) == 0:
+            continue
+
+        value = np.average(descriptive_variable_of_interest)
+
+        x.append(release_date)
+        y.append(value)
+
+    fig = Figure(dpi=300)
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
+
+    ax.plot(x, y)
+    ax.set_title(legend_keyword + ' among monthly Steam releases')
+    ax.set_xlabel('Date')
+    ax.set_ylabel(legend_keyword)
+
+    ax.grid()
+    base_plot_filename = 'proportion_' + description_keyword
+    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+
+    return
+
+
+def fill_in_platform_support(steam_database):
+    for app_id in steam_database:
+        steam_database[app_id]['windows_support'] = steam_database[app_id]['platforms']['windows']
+        steam_database[app_id]['mac_support'] = steam_database[app_id]['platforms']['mac']
+        steam_database[app_id]['linux_support'] = steam_database[app_id]['platforms']['linux']
+
+    return steam_database
+
+
 if __name__ == '__main__':
     steamspy_database, categories, genres = load_aggregated_database()
+
+    steamspy_database = fill_in_platform_support(steamspy_database)
 
     keywords = get_description_keywords(steamspy_database, verbose=True)
 
@@ -285,3 +349,26 @@ if __name__ == '__main__':
     plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Median', 'recommendations')
 
     plot_time_series_for_numeric_variable_of_interest(steam_calendar, steamspy_database, 'Average', 'recommendations')
+
+    sentence_prefixe = 'Proportion of games with '
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'controller_support',
+                                                      sentence_prefixe + 'controller support')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'demos',
+                                                      sentence_prefixe + 'a demo')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'ext_user_account_notice',
+                                                      sentence_prefixe + '3rd-party account')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'required_age',
+                                                      sentence_prefixe + 'age check')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'windows_support',
+                                                      sentence_prefixe + 'Windows support')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'mac_support',
+                                                      sentence_prefixe + 'Mac support')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'linux_support',
+                                                      sentence_prefixe + 'Linux support')
