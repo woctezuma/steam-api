@@ -1,5 +1,8 @@
 import datetime
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from json_data_utils import load_data
 from steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
 
@@ -87,9 +90,59 @@ def build_steam_calendar(steam_database, verbose=False):
     return release_calendar, weird_release_dates
 
 
+def plot_time_series_num_releases(release_calendar):
+    x = []
+    y = []
+
+    all_release_dates = sorted(list(release_calendar.keys()))
+
+    for release_date in all_release_dates:
+        app_ids = release_calendar[release_date]
+
+        value = len(app_ids)
+
+        x.append(release_date)
+        y.append(value)
+
+    plt.plot(x, y)
+    plt.title('Number of Steam releases per day')
+    plt.show()
+
+    return
+
+
+def plot_time_series_median_price(release_calendar, steam_database):
+    x = []
+    y = []
+
+    all_release_dates = sorted(list(release_calendar.keys()))
+
+    for release_date in all_release_dates:
+        app_ids = release_calendar[release_date]
+
+        prices = [steam_database[app_id]['price_overview'] for app_id in app_ids
+                  if steam_database[app_id]['price_overview'] is not None]
+        if len(prices) == 0:
+            continue
+        value = np.median(prices)
+
+        x.append(release_date)
+        y.append(value)
+
+    plt.plot(x, y)
+    plt.title('Median price of Steam releases per day')
+    plt.show()
+
+    return
+
+
 if __name__ == '__main__':
     steamspy_database, categories, genres = load_aggregated_database()
 
     keywords = get_description_keywords(steamspy_database, verbose=True)
 
     steam_calendar, weird_dates = build_steam_calendar(steamspy_database, verbose=False)
+
+    plot_time_series_num_releases(steam_calendar)
+
+    plot_time_series_median_price(steam_calendar, steamspy_database)
