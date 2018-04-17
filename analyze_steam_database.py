@@ -72,7 +72,7 @@ def build_steam_calendar(steam_database, verbose=False):
                                     print('\nGames being sold with weird release dates:')
                                 if steam_database[appID]['price_overview'] is not None:
                                     if not (steam_database[appID]['is_free']):
-                                        sentence = 'appID={0:6}\t' + steamspy_database[appID]['name']
+                                        sentence = 'appID={0:6}\t' + steam_database[appID]['name']
                                         print(sentence.format(appID))
                             continue
 
