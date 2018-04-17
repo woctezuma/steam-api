@@ -105,13 +105,15 @@ def plot_time_series_num_releases(release_calendar):
         y.append(value)
 
     plt.plot(x, y)
-    plt.title('Number of Steam releases per day')
+    plt.title('Number of games released on Steam each month')
+    plt.xlabel('Date')
+    plt.ylabel('Number of game releases')
     plt.show()
 
     return
 
 
-def plot_time_series_median_price(release_calendar, steam_database):
+def plot_time_series_median_price(release_calendar, steam_database, statistic_str='Median'):
     x = []
     y = []
 
@@ -120,20 +122,62 @@ def plot_time_series_median_price(release_calendar, steam_database):
     for release_date in all_release_dates:
         app_ids = release_calendar[release_date]
 
-        prices = [steam_database[app_id]['price_overview'] for app_id in app_ids
-                  if steam_database[app_id]['price_overview'] is not None]
-        if len(prices) == 0:
+        prices_in_cents = [steam_database[app_id]['price_overview'] for app_id in app_ids
+                           if steam_database[app_id]['price_overview'] is not None]
+        if len(prices_in_cents) == 0:
             continue
-        value = np.median(prices)
+
+        if statistic_str == 'Median':
+            price_summary_in_cents = np.median(prices_in_cents)
+        else:
+            price_summary_in_cents = np.average(prices_in_cents)
+
+        price_summary_in_euros = price_summary_in_cents / 100
+        value = price_summary_in_euros
 
         x.append(release_date)
         y.append(value)
 
     plt.plot(x, y)
-    plt.title('Median price of Steam releases per day')
+    plt.title(statistic_str + ' price of games released on Steam each month')
+    plt.xlabel('Date')
+    plt.ylabel(statistic_str + ' price (in €)')
     plt.show()
 
     return
+
+
+def simplify_calendar(release_calendar):
+    merged_calendar = dict()
+    for release_date in release_calendar:
+        merged_release_date = datetime.date(release_date.year, release_date.month, 1)
+        try:
+            merged_calendar[merged_release_date].extend(release_calendar[release_date])
+        except KeyError:
+            merged_calendar[merged_release_date] = release_calendar[release_date]
+
+    return merged_calendar
+
+
+def remove_current_date(release_calendar):
+    now = datetime.datetime.now()
+
+    this_day = datetime.date(now.year, now.month, now.day)
+
+    this_month = datetime.date(this_day.year, this_day.month, 1)
+
+    # Start by copying the dictionary
+    # Reference: https://stackoverflow.com/a/5844692
+    filtered_calendar = dict(release_calendar)
+    try:
+        del filtered_calendar[this_day]
+    except KeyError:
+        try:
+            del filtered_calendar[this_month]
+        except KeyError:
+            print('No recent date could be removed from the calendar.')
+
+    return filtered_calendar
 
 
 if __name__ == '__main__':
@@ -143,6 +187,15 @@ if __name__ == '__main__':
 
     steam_calendar, weird_dates = build_steam_calendar(steamspy_database, verbose=False)
 
-    plot_time_series_num_releases(steam_calendar)
+    steam_calendar = simplify_calendar(steam_calendar)
 
-    plot_time_series_median_price(steam_calendar, steamspy_database)
+    steam_calendar = remove_current_date(steam_calendar)
+
+    plot_to_screen = True
+
+    if plot_to_screen:
+        plot_time_series_num_releases(steam_calendar)
+
+        plot_time_series_median_price(steam_calendar, steamspy_database, 'Median')
+
+        plot_time_series_median_price(steam_calendar, steamspy_database, 'Average')
