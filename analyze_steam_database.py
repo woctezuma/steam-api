@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -90,6 +91,15 @@ def build_steam_calendar(steam_database, verbose=False):
     return release_calendar, weird_release_dates
 
 
+def get_full_plot_filename(base_plot_filename):
+    output_folder = 'plots/'
+    pathlib.Path(output_folder).mkdir(parents=True, exist_ok=True)
+
+    file_extension = '.png'
+    full_plot_filename = output_folder + base_plot_filename + file_extension
+
+    return full_plot_filename
+
 def plot_time_series_num_releases(release_calendar):
     x = []
     y = []
@@ -104,16 +114,23 @@ def plot_time_series_num_releases(release_calendar):
         x.append(release_date)
         y.append(value)
 
+    fig, ax = plt.subplots(dpi=300)
+
     plt.plot(x, y)
     plt.title('Number of games released on Steam each month')
     plt.xlabel('Date')
     plt.ylabel('Number of game releases')
-    plt.show()
+
+    plt.tight_layout()
+    plt.grid()
+    base_plot_filename = 'num_releases'
+    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+    plt.close(fig)
 
     return
 
 
-def plot_time_series_median_price(release_calendar, steam_database, statistic_str='Median'):
+def plot_time_series_price(release_calendar, steam_database, statistic_str='Median'):
     x = []
     y = []
 
@@ -138,11 +155,18 @@ def plot_time_series_median_price(release_calendar, steam_database, statistic_st
         x.append(release_date)
         y.append(value)
 
+    fig, ax = plt.subplots(dpi=300)
+
     plt.plot(x, y)
     plt.title(statistic_str + ' price of games released on Steam each month')
     plt.xlabel('Date')
     plt.ylabel(statistic_str + ' price (in €)')
-    plt.show()
+
+    plt.tight_layout()
+    plt.grid()
+    base_plot_filename = statistic_str.lower() + '_price'
+    fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
+    plt.close(fig)
 
     return
 
@@ -196,6 +220,6 @@ if __name__ == '__main__':
     if plot_to_screen:
         plot_time_series_num_releases(steam_calendar)
 
-        plot_time_series_median_price(steam_calendar, steamspy_database, 'Median')
+        plot_time_series_price(steam_calendar, steamspy_database, 'Median')
 
-        plot_time_series_median_price(steam_calendar, steamspy_database, 'Average')
+        plot_time_series_price(steam_calendar, steamspy_database, 'Average')
