@@ -315,10 +315,19 @@ def fill_in_platform_support(steam_database):
     return steam_database
 
 
+def fill_in_drm_support(steam_database):
+    for app_id in steam_database:
+        steam_database[app_id]['drm_support'] = bool(steam_database[app_id]['drm_notice'] is not None)
+
+    return steam_database
+
+
 if __name__ == '__main__':
     steamspy_database, categories, genres = load_aggregated_database()
 
     steamspy_database = fill_in_platform_support(steamspy_database)
+
+    steamspy_database = fill_in_drm_support(steamspy_database)
 
     keywords = get_description_keywords(steamspy_database, verbose=True)
 
@@ -372,3 +381,6 @@ if __name__ == '__main__':
 
     plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'linux_support',
                                                       sentence_prefixe + 'Linux support')
+
+    plot_time_series_for_boolean_variable_of_interest(steam_calendar, steamspy_database, 'drm_support',
+                                                      sentence_prefixe + '3rd-party DRM')
