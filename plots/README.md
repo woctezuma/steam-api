@@ -17,4 +17,6 @@
 ![Proportion of games supporting Windows](proportion_windows_support.png)
 ![Proportion of games supporting controller](proportion_controller_support.png)
 ![Proportion of games using a third-party DRM](proportion_drm_support.png)
+![Proportion of games using a third-party DRM starting in 2016](proportion_drm_support_from_2016.png)
+![Number of games using a third-party DRM starting in 2016](sum_num_drm_support_from_2016.png)
 ![Proportion of games with a check of player age](proportion_required_age.png)
