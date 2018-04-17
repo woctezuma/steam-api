@@ -384,7 +384,7 @@ def get_steam_database(verbosity=True):
 
     keywords = get_description_keywords(steamspy_database, verbose=verbosity)
 
-    return steam_database
+    return steam_database, categories, genres, keywords
 
 
 def get_steam_calendar(steam_database, verbosity=False):
