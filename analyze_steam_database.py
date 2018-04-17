@@ -1,6 +1,7 @@
 import datetime
 import pathlib
 
+import matplotlib.dates as mdates
 import numpy as np
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -213,7 +214,8 @@ def remove_current_date(release_calendar):
 
 def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, statistic_str='Median',
                                                       description_keyword='achievements',
-                                                      legend_keyword=None):
+                                                      legend_keyword=None,
+                                                      starting_year=None):
     if legend_keyword is None:
         legend_keyword = 'number of ' + description_keyword
 
@@ -225,6 +227,10 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
     for release_date in all_release_dates:
         app_ids = release_calendar[release_date]
 
+        if starting_year is not None and release_date.year < starting_year:
+            # Skip release dates prior to the input starting year
+            continue
+
         descriptive_variable_of_interest = [int(steam_database[app_id][description_keyword]) for app_id in app_ids
                                             if steam_database[app_id][description_keyword] is not None]
         if len(descriptive_variable_of_interest) == 0:
@@ -232,8 +238,10 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
 
         if statistic_str == 'Median':
             value = np.median(descriptive_variable_of_interest)
-        else:
+        elif statistic_str == 'Average':
             value = np.average(descriptive_variable_of_interest)
+        else:
+            value = np.sum(descriptive_variable_of_interest)
 
         x.append(release_date)
         y.append(value)
@@ -242,10 +250,18 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
 
+    if statistic_str == 'Median' or statistic_str == 'Average':
+        statistic_legend = statistic_str + ' '
+    else:
+        statistic_legend = ''
+
     ax.plot(x, y)
-    ax.set_title(statistic_str + ' ' + legend_keyword + ' among monthly Steam releases')
+    ax.set_title(statistic_legend + legend_keyword + ' among monthly Steam releases')
     ax.set_xlabel('Date')
-    ax.set_ylabel(statistic_str + ' ' + legend_keyword)
+    ax.set_ylabel(statistic_legend + legend_keyword)
+
+    if starting_year is not None:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 
     ax.grid()
     base_plot_filename = statistic_str.lower() + '_num_' + description_keyword
@@ -266,7 +282,9 @@ def generic_converter(my_boolean):
 
 def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database,
                                                       description_keyword='controller_support',
-                                                      legend_keyword=None):
+                                                      legend_keyword=None,
+                                                      starting_year=None,
+                                                      max_ordinate=1.0):
     if legend_keyword is None:
         sentence_prefixe_for_proportion = 'Proportion of games with '
         legend_keyword = sentence_prefixe_for_proportion + description_keyword
@@ -279,6 +297,10 @@ def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_da
     for release_date in all_release_dates:
         app_ids = release_calendar[release_date]
 
+        if starting_year is not None and release_date.year < starting_year:
+            # Skip release dates prior to the input starting year
+            continue
+
         descriptive_variable_of_interest = [generic_converter(steam_database[app_id][description_keyword])
                                             for app_id in app_ids
                                             if steam_database[app_id][description_keyword] is not None]
@@ -290,6 +312,9 @@ def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_da
         x.append(release_date)
         y.append(value)
 
+    if max_ordinate is None:
+        max_ordinate = np.min([1.0, np.max(y) * 1.1])
+
     fig = Figure(dpi=300)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
@@ -298,7 +323,10 @@ def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_da
     ax.set_title(legend_keyword + ' among monthly Steam releases')
     ax.set_xlabel('Date')
     ax.set_ylabel(legend_keyword)
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0, max_ordinate)
+
+    if starting_year is not None:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 
     ax.grid()
     base_plot_filename = 'proportion_' + description_keyword
@@ -375,6 +403,29 @@ def plot_every_time_series_based_on_steam_calendar(release_calendar, steam_datab
     return
 
 
+def plot_durante_request(release_calendar, steam_database):
+    # Reference: https://www.resetera.com/posts/6862653/
+
+    chosen_starting_year = 2016
+    chosen_max_ordinate = None
+
+    sentence_prefixe = 'Proportion of games with '
+
+    # noinspection PyTypeChecker
+    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'drm_support',
+                                                      sentence_prefixe + '3rd-party DRM',
+                                                      chosen_starting_year,
+                                                      chosen_max_ordinate)
+
+    sentence_prefixe = 'Number of games with '
+
+    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Sum', 'drm_support',
+                                                      sentence_prefixe + '3rd-party DRM',
+                                                      chosen_starting_year)
+
+    return
+
+
 def get_steam_database(verbosity=True):
     steam_database, categories, genres = load_aggregated_database()
 
@@ -404,3 +455,5 @@ if __name__ == '__main__':
     steam_calendar = get_steam_calendar(steamspy_database)
 
     plot_every_time_series_based_on_steam_calendar(steam_calendar, steamspy_database)
+
+    plot_durante_request(steam_calendar, steamspy_database)
