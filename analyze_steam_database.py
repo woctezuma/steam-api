@@ -314,7 +314,7 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
         feature_list.append(features)
 
     confidence_interval_data = {}
-    if plot_confidence_interval_if_possible and statistic_str is not None and statistic_str != 'Median':
+    if plot_confidence_interval_if_possible and statistic_str is not None and statistic_str == 'Average':
         (mean, lb, ub) = get_mean_and_confidence_interval(feature_list, is_variable_of_interest_numeric)
         # Thresholding of lower-bound of confidence interval so that it is non-negative
         lb = np.array([max(i, 0) for i in lb])
