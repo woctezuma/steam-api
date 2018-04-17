@@ -265,6 +265,10 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_da
 
     ax.grid()
     base_plot_filename = statistic_str.lower() + '_num_' + description_keyword
+
+    if starting_year is not None:
+        base_plot_filename = base_plot_filename + '_from_' + str(starting_year)
+
     fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
 
     return
@@ -330,6 +334,10 @@ def plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_da
 
     ax.grid()
     base_plot_filename = 'proportion_' + description_keyword
+
+    if starting_year is not None:
+        base_plot_filename = base_plot_filename + '_from_' + str(starting_year)
+
     fig.savefig(get_full_plot_filename(base_plot_filename), bbox_inches='tight')
 
     return
