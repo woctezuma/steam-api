@@ -100,6 +100,7 @@ def get_full_plot_filename(base_plot_filename):
 
     return full_plot_filename
 
+
 def plot_time_series_num_releases(release_calendar):
     x = []
     y = []
