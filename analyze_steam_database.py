@@ -40,14 +40,11 @@ def build_steam_calendar(steam_database, verbose=False):
         is_released = release_info['is_released']
         release_date_as_str = release_info['date']
 
-        if len(release_date_as_str) == 0:
+        if not is_released:
             continue
 
         release_date_as_str = release_date_as_str.replace(',', '')  # "Nov 11, 2017" == "Nov 11 2017"
-        release_date_as_str = release_date_as_str.replace('st ', ' ')  # 1st
-        release_date_as_str = release_date_as_str.replace('nd ', ' ')  # 2nd
-        release_date_as_str = release_date_as_str.replace('rd ', ' ')  # 3rd
-        release_date_as_str = release_date_as_str.replace('th ', ' ')  # nth
+        release_date_as_str = release_date_as_str.replace('сен.', 'September')  # Specifically for appID=689740
 
         try:
             # Reference: https://stackoverflow.com/a/6557568/
@@ -62,13 +59,19 @@ def build_steam_calendar(steam_database, verbose=False):
                     try:
                         release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%d %B %Y')
                     except ValueError:
-                        weird_release_dates.add(release_date_as_str)
-                        weird_counter += 1
-                        if verbose:
-                            if weird_counter == 1:
-                                print('\nGames with weird release dates (wrong format, or missing the day):')
-                            print(steam_database[appID])
-                        continue
+                        try:
+                            release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%b %Y')
+                        except ValueError:
+                            weird_release_dates.add(release_date_as_str)
+                            weird_counter += 1
+                            if verbose:
+                                if weird_counter == 1:
+                                    print('\nGames being sold with weird release dates:')
+                                if steam_database[appID]['price_overview'] is not None:
+                                    if not (steam_database[appID]['is_free']):
+                                        sentence = 'appID={0:6}\t' + steamspy_database[appID]['name']
+                                        print(sentence.format(appID))
+                            continue
 
         try:
             release_calendar[release_date_as_datetime].append(appID)
