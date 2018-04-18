@@ -1,3 +1,5 @@
 matplotlib
 numpy
 requests
+scipy
+sklearn
