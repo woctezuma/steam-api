@@ -142,7 +142,7 @@ if __name__ == '__main__':
     tag_embedding = compute_tag_map(joint_matrix)
 
     plot_filename = 'tag_map.png'
-    plot_title = "Map of Steam categories and genres"
+    plot_title = 't-SNE plot of Steam categories and genres'
     red_tags = list(all_genres_dict.values())
 
     display_tag_map(tag_embedding, tags_list_sorted, plot_filename, plot_title, red_tags)
