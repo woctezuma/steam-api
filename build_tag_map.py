@@ -33,8 +33,10 @@ def preprocess_data(steam_database, categories_dict, genres_dict):
     game_counter = 0
 
     for appid in steam_database:
-        categories = [categories_dict[str(i)] for i in steam_database[appid]['categories']]
-        genres = [genres_dict[str(i)] for i in steam_database[appid]['genres']]
+        categories = [categories_dict[str(i)] for i in steam_database[appid]['categories']
+                      if str(i) in categories_dict]
+        genres = [genres_dict[str(i)] for i in steam_database[appid]['genres']
+                  if str(i) in genres_dict]
 
         current_tags = categories
         current_tags.extend(genres)
