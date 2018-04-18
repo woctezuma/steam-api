@@ -1,4 +1,4 @@
-# Plots of categories and genres
+# Plots of categories and genres with 95% confidence interval
 
 ![placeholder](proportion_Accounting_from_2009.png)
 ![placeholder](proportion_Action_from_2009.png)
