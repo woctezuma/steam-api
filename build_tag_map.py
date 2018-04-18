@@ -58,7 +58,7 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
     # noinspection PyPep8Naming
     X = (X - x_min) / (x_max - x_min)
 
-    fig = Figure(dpi=300)
+    fig = Figure(dpi=600)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
 
