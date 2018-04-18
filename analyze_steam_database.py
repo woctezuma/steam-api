@@ -579,14 +579,14 @@ def plot_time_series_genre(release_calendar, steam_database, all_genres, selecte
 
 
 def plot_every_time_series_based_on_categories_and_genres(release_calendar, steam_database,
-                                                          all_categories_dict, all_genres_dict):
-    for categorie_key in all_categories_dict:
-        print(all_categories_dict[categorie_key])
-        plot_time_series_categorie(release_calendar, steam_database, all_categories_dict, categorie_key)
+                                                          categories_dict, genres_dict):
+    for categorie_key in categories_dict:
+        print(categories_dict[categorie_key])
+        plot_time_series_categorie(release_calendar, steam_database, categories_dict, categorie_key)
 
-    for genre_key in all_genres_dict:
-        print(all_genres_dict[genre_key])
-        plot_time_series_genre(release_calendar, steam_database, all_genres_dict, genre_key)
+    for genre_key in genres_dict:
+        print(genres_dict[genre_key])
+        plot_time_series_genre(release_calendar, steam_database, genres_dict, genre_key)
 
     return
 
