@@ -5,7 +5,6 @@ import numpy as np
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from sklearn.decomposition import TruncatedSVD
 from sklearn.manifold import TSNE
 
 from analyze_steam_database import get_steam_database
@@ -128,25 +127,11 @@ def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None
 
 
 def compute_tag_map(tag_joint_game_matrix):
-    # A first try, inspired from my steam-tag-mapping Github repository
+    tsne = TSNE(n_components=2, random_state=0, verbose=2, init='pca')
 
-    num_components_svd = 50
-    num_components_tsne = 2
+    embedded_data = tsne.fit_transform(tag_joint_game_matrix)
 
-    svd = TruncatedSVD(n_components=num_components_svd, random_state=0)
-
-    # We have chosen a learning rate lower than the default (1000) so that the error decreases during early iterations:
-    tsne = TSNE(n_components=num_components_tsne, random_state=0, verbose=2, learning_rate=400, perplexity=25)
-
-    # 1st step: reduce the dimensionality of the input SPARSE matrix, with TruncatedSVD as suggested in:
-    # http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
-    reduced_matrix = svd.fit_transform(tag_joint_game_matrix)
-
-    # 2nd step: apply t-SNE to the reduced DENSE matrix
-    # noinspection PyPep8Naming
-    X = tsne.fit_transform(reduced_matrix)
-
-    return X
+    return embedded_data
 
 
 if __name__ == '__main__':
@@ -157,7 +142,7 @@ if __name__ == '__main__':
     tag_embedding = compute_tag_map(joint_matrix)
 
     plot_filename = 'tag_map.png'
-    plot_title = "Map of Steam tags"
+    plot_title = "Map of Steam categories and genres"
     red_tags = list(all_genres_dict.values())
 
     display_tag_map(tag_embedding, tags_list_sorted, plot_filename, plot_title, red_tags)
