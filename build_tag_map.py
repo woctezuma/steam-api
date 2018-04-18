@@ -63,6 +63,7 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
     ax = fig.add_subplot(111)
 
     ax.scatter(X[:, 0], X[:, 1])
+    ax.axis('off')
 
     # Add a label to each node. The challenge here is that we want to
     # position the labels to avoid overlap with other labels
