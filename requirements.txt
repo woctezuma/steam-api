@@ -1,5 +1,5 @@
-matplotlib
-numpy
-requests
-scipy
-sklearn
+matplotlib==2.2.2
+numpy==1.14.3
+requests==2.18.4
+scipy==1.0.1
+sklearn==0.0
