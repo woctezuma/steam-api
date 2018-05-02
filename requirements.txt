@@ -1,5 +1,5 @@
 matplotlib==2.2.2
-numpy
+numpy==1.14.3
 requests
 scipy
 sklearn
