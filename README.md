@@ -1,7 +1,14 @@
-# Steam API [![Build status][Build image]][Build]
+# Steam API [![Build status][Build image]][Build] [![Updates][Dependency image]][PyUp] [![Python 3][Python3 image]][PyUp] [![Code coverage][Codecov image]][Codecov]
 
   [Build]: https://travis-ci.org/woctezuma/steam-api
   [Build image]: https://travis-ci.org/woctezuma/steam-api.svg?branch=master
+
+  [PyUp]: https://pyup.io/repos/github/woctezuma/steam-api/
+  [Dependency image]: https://pyup.io/repos/github/woctezuma/steam-api/shield.svg
+  [Python3 image]: https://pyup.io/repos/github/woctezuma/steam-api/python-3-shield.svg
+
+  [Codecov]: https://codecov.io/gh/woctezuma/steam-api
+  [Codecov image]: https://codecov.io/gh/woctezuma/steam-api/branch/master/graph/badge.svg
 
 This repository contains Python code to download data through Steam API.
 
