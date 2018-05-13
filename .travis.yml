@@ -2,10 +2,9 @@ language: python
 python:
  - "3.6"
 install:
+ - pip install codecov
  - pip install -r requirements.txt
 script:
-- python json_data_utils.py
-- python steam_catalog_utils.py
-- python app_details_utils.py
-- python analyze_steam_database.py
-- python build_tag_map.py
+ - coverage run tests.py
+after_success:
+ - codecov
