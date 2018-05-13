@@ -135,7 +135,7 @@ def compute_tag_map(tag_joint_game_matrix):
     return embedded_data
 
 
-if __name__ == '__main__':
+def main():
     steamspy_database, all_categories_dict, all_genres_dict = get_steam_database(verbosity=False)
 
     joint_matrix, tags_list_sorted = preprocess_data(steamspy_database, all_categories_dict, all_genres_dict)
@@ -147,3 +147,9 @@ if __name__ == '__main__':
     red_tags = list(all_genres_dict.values())
 
     display_tag_map(tag_embedding, tags_list_sorted, plot_filename, plot_title, red_tags)
+
+    return True
+
+
+if __name__ == '__main__':
+    main()

@@ -54,6 +54,12 @@ def load_app_details(app_id):
     return loaded_app_details, success_flag, status_code
 
 
-if __name__ == '__main__':
+def main():
     appID = '440'
     (app_details, is_success, query_status_code) = load_app_details(appID)
+
+    return True
+
+
+if __name__ == '__main__':
+    main()

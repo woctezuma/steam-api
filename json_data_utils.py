@@ -41,5 +41,10 @@ def load_data(json_filename):
     return data
 
 
-if __name__ == '__main__':
+def main():
     print('Nothing to do.')
+    return True
+
+
+if __name__ == '__main__':
+    main()

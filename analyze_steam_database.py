@@ -614,7 +614,7 @@ def get_steam_calendar(steam_database, verbosity=False):
     return release_calendar
 
 
-if __name__ == '__main__':
+def main():
     steamspy_database, all_categories_dict, all_genres_dict = get_steam_database()
 
     steam_calendar = get_steam_calendar(steamspy_database)
@@ -625,3 +625,9 @@ if __name__ == '__main__':
 
     plot_every_time_series_based_on_categories_and_genres(steam_calendar, steamspy_database, all_categories_dict,
                                                           all_genres_dict)
+
+    return True
+
+
+if __name__ == '__main__':
+    main()

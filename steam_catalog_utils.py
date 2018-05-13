@@ -62,5 +62,10 @@ def load_steam_catalog():
     return loaded_steam_catalog, success_flag, status_code
 
 
-if __name__ == '__main__':
+def main():
     (steam_catalog, is_success, query_status_code) = load_steam_catalog()
+    return True
+
+
+if __name__ == '__main__':
+    main()
