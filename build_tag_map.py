@@ -2,6 +2,7 @@
 # Reference: https://github.com/woctezuma/steam-tag-mapping/blob/master/map_tags.py
 
 import numpy as np
+import umap
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -127,10 +128,13 @@ def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None
     return
 
 
-def compute_tag_map(tag_joint_game_matrix):
-    tsne = TSNE(n_components=2, random_state=0, verbose=2, init='pca')
+def compute_tag_map(tag_joint_game_matrix, embedding_name='t-SNE'):
+    if embedding_name == 't-SNE':
+        embedding = TSNE(n_components=2, random_state=0, verbose=2, init='pca')
+    else:
+        embedding = umap.UMAP(n_neighbors=20, min_dist=0.15, metric='correlation', verbose=True)
 
-    embedded_data = tsne.fit_transform(tag_joint_game_matrix)
+    embedded_data = embedding.fit_transform(tag_joint_game_matrix)
 
     return embedded_data
 
@@ -140,10 +144,11 @@ def main():
 
     joint_matrix, tags_list_sorted = preprocess_data(steamspy_database, all_categories_dict, all_genres_dict)
 
-    tag_embedding = compute_tag_map(joint_matrix)
+    method_name = 't-SNE'  # Either 't-SNE' or 'u-MAP'
+    tag_embedding = compute_tag_map(joint_matrix, embedding_name=method_name)
 
     plot_filename = 'tag_map.png'
-    plot_title = 't-SNE plot of categories (in black) and genres (in red)'
+    plot_title = '{} plot of categories (in black) and genres (in red)'.format(method_name)
     red_tags = list(all_genres_dict.values())
 
     display_tag_map(tag_embedding, tags_list_sorted, plot_filename, plot_title, red_tags)
