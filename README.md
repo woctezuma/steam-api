@@ -21,11 +21,13 @@ Data is available as a snapshot in [another repository](https://github.com/wocte
 ### Store attributes
 
 Outputs for each Steam store attribute can be found in [`plots/`](plots/).
+
 Confidence intervals can be found in [`plots_with_confidence_interval/`](plots_with_confidence_interval/).
 
 ### Categories and genres
 
 Outputs for each categorie and genre can be found in [`plots_categories_and_genres/`](plots_categories_and_genres/).
+
 Confidence intervals can be found in [`plots_categories_and_genres_with_confidence_interval/`](plots_categories_and_genres_with_confidence_interval/).
 
 ![t-SNE plot of Steam categories and genres](tag_map.png)
