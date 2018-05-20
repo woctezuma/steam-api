@@ -130,7 +130,7 @@ def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None
 
 def compute_tag_map(tag_joint_game_matrix, embedding_name='t-SNE'):
     if embedding_name == 't-SNE':
-        embedding = TSNE(n_components=2, random_state=0, verbose=2, init='pca')
+        embedding = TSNE(n_components=2, random_state=0, verbose=2, init='pca', metric='correlation')
     else:
         embedding = umap.UMAP(n_neighbors=20, min_dist=0.15, metric='correlation', verbose=True)
 
