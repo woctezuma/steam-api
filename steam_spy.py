@@ -2,19 +2,20 @@ import logging
 import pathlib
 import time
 
-from app_details_utils import load_app_details
-from json_data_utils import get_data_path, save_data
+import steampi.api
+import steampi.json_utils
+
 from steam_catalog_utils import load_steam_catalog
 
 
 def get_previously_seen_app_ids_of_games():
-    log_filename = get_data_path() + 'successful_appIDs.txt'
+    log_filename = steampi.json_utils.get_data_path() + 'successful_appIDs.txt'
 
     return log_filename
 
 
 def get_previously_seen_app_ids_of_non_games():
-    log_filename = get_data_path() + 'faulty_appIDs.txt'
+    log_filename = steampi.json_utils.get_data_path() + 'faulty_appIDs.txt'
 
     return log_filename
 
@@ -77,7 +78,7 @@ def scrape_steam_data():
             time.sleep(wait_time)
             query_count = 0
 
-        (app_details, is_success, query_status_code) = load_app_details(appID)
+        (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
         if query_status_code is not None:
             query_count += 1
 
@@ -86,7 +87,7 @@ def scrape_steam_data():
             time.sleep(wait_time)
             query_count = 0
 
-            (app_details, is_success, query_status_code) = load_app_details(appID)
+            (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
             if query_status_code is not None:
                 query_count += 1
 
@@ -113,7 +114,7 @@ def aggregate_steam_data(verbose=True):
     all_genres = {}
 
     for appID in parsed_app_ids:
-        (app_details, is_success, query_status_code) = load_app_details(appID)
+        (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
 
         if app_details['type'] == 'game':
 
@@ -213,19 +214,19 @@ def aggregate_steam_data(verbose=True):
 
 
 def get_steam_database_filename():
-    steam_database_filename = get_data_path() + 'steamspy.json'
+    steam_database_filename = steampi.json_utils.get_data_path() + 'steamspy.json'
 
     return steam_database_filename
 
 
 def get_steam_categories_filename():
-    steam_categories_filename = get_data_path() + 'categories.json'
+    steam_categories_filename = steampi.json_utils.get_data_path() + 'categories.json'
 
     return steam_categories_filename
 
 
 def get_steam_genres_filename():
-    steam_genres_filename = get_data_path() + 'genres.json'
+    steam_genres_filename = steampi.json_utils.get_data_path() + 'genres.json'
 
     return steam_genres_filename
 
@@ -238,6 +239,6 @@ if __name__ == '__main__':
     (steamspy_database, categories, genres) = aggregate_steam_data()
 
     print('Saving')
-    save_data(get_steam_database_filename(), steamspy_database)
-    save_data(get_steam_categories_filename(), categories)
-    save_data(get_steam_genres_filename(), genres)
+    steampi.json_utils.save_json_data(get_steam_database_filename(), steamspy_database)
+    steampi.json_utils.save_json_data(get_steam_categories_filename(), categories)
+    steampi.json_utils.save_json_data(get_steam_genres_filename(), genres)

@@ -4,18 +4,18 @@ from math import sqrt
 
 import matplotlib.dates as mdates
 import numpy as np
+import steampi.json_utils
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from json_data_utils import load_data
 from steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
 
 
 def load_aggregated_database():
-    steam_database = load_data(get_steam_database_filename())
-    all_categories = load_data(get_steam_categories_filename())
-    all_genres = load_data(get_steam_genres_filename())
+    steam_database = steampi.json_utils.load_json_data(get_steam_database_filename())
+    all_categories = steampi.json_utils.load_json_data(get_steam_categories_filename())
+    all_genres = steampi.json_utils.load_json_data(get_steam_genres_filename())
 
     return steam_database, all_categories, all_genres
 
