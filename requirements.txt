@@ -1,6 +1,6 @@
 matplotlib==2.2.2
 numpy==1.14.3
-requests==2.18.4
+requests==2.19.1
 scipy==1.1.0
 sklearn==0.0
 umap-learn==0.2.4
