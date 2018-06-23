@@ -20,15 +20,15 @@ Data is available as a snapshot in [another repository](https://github.com/wocte
 
 ### Store attributes
 
-Outputs for each Steam store attribute can be found in [`plots/`](plots/).
+Outputs for each Steam store attribute can be found in [`plots/`](https://github.com/woctezuma/steam-api/wiki/Store-attributes).
 
-Confidence intervals can be found in [`plots_with_confidence_interval/`](plots_with_confidence_interval/).
+Confidence intervals can be found in [`plots_with_confidence_interval/`](https://github.com/woctezuma/steam-api/wiki/Store-attributes-with-interval).
 
 ### Categories and genres
 
-Outputs for each categorie and genre can be found in [`plots_categories_and_genres/`](plots_categories_and_genres/).
+Outputs for each categorie and genre can be found in [`plots_categories_and_genres/`](https://github.com/woctezuma/steam-api/wiki/Categories).
 
-Confidence intervals can be found in [`plots_categories_and_genres_with_confidence_interval/`](plots_categories_and_genres_with_confidence_interval/).
+Confidence intervals can be found in [`plots_categories_and_genres_with_confidence_interval/`](https://github.com/woctezuma/steam-api/wiki/Categories-with-interval).
 
 ![t-SNE plot of Steam categories and genres](tag_map.png)
 
