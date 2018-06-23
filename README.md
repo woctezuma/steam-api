@@ -30,7 +30,7 @@ Outputs for each categorie and genre can be found in [`plots_categories_and_genr
 
 Confidence intervals can be found in [`plots_categories_and_genres_with_confidence_interval/`](https://github.com/woctezuma/steam-api/wiki/Categories-with-interval).
 
-![t-SNE plot of Steam categories and genres](tag_map.png)
+![t-SNE plot of Steam categories and genres](https://raw.githubusercontent.com/wiki/woctezuma/steam-api/tag_map.png)
 
 ## Addendum
 
