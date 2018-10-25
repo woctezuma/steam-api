@@ -1,4 +1,4 @@
-matplotlib==3.0.0
+matplotlib==3.0.1
 numpy==1.15.3
 requests==2.20.0
 scipy==1.1.0
