@@ -3,5 +3,5 @@ numpy==1.15.3
 requests==2.20.0
 scipy==1.1.0
 sklearn==0.0
-umap-learn==0.3.6
+umap-learn==0.3.7
 steampi==0.2.4
