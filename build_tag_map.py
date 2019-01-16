@@ -110,7 +110,8 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
                 verticalalignment=verticalalignment,
                 fontdict={'family': 'serif', 'weight': my_weight, 'size': my_font_size, 'stretch': my_stretch})
 
-    ax.set_xticks([]), ax.set_yticks([])
+    ax.set_xticks([])
+    ax.set_yticks([])
     if title is not None:
         ax.set_title(title)
 
