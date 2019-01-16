@@ -56,7 +56,8 @@ def scrape_steam_data():
 
     (steam_catalog, is_success, query_status_code) = load_steam_catalog()
 
-    assert is_success
+    if not is_success:
+        raise AssertionError()
     if query_status_code is not None:
         query_count += 1
 
@@ -93,7 +94,8 @@ def scrape_steam_data():
 
         appid_log_file_name = success_filename
         if (query_status_code is not None) and not is_success:
-            assert (query_status_code == successful_status_code)
+            if not (query_status_code == successful_status_code):
+                raise AssertionError()
             appid_log_file_name = error_filename
 
         with open(appid_log_file_name, "a") as f:
