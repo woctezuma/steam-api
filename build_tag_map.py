@@ -53,7 +53,10 @@ def preprocess_data(steam_database, categories_dict, genres_dict):
 
 # Scale and visualize the embedding vectors
 # noinspection PyPep8Naming
-def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted_tags=list(), delta_font=0.003):
+def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted_tags=None, delta_font=0.003):
+    if highlighted_tags is None:
+        highlighted_tags = []
+
     # Code copied from: plot_embedding() in https://github.com/woctezuma/steam-tag-mapping/blob/master/map_tags.py
     x_min, x_max = np.min(X, 0), np.max(X, 0)
     # noinspection PyPep8Naming
@@ -118,7 +121,10 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
 
 
 def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None,
-                    highlighted_tags=list()):
+                    highlighted_tags=None):
+    if highlighted_tags is None:
+        highlighted_tags = []
+
     if len(highlighted_tags) == 0:
         highlighted_tags = ['Early Access', 'Free to Play', 'In-App Purchases', 'Steam Trading Cards',
                             'Violent', 'Gore']
