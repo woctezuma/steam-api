@@ -116,7 +116,7 @@ def aggregate_steam_data(verbose=True):
     all_genres = {}
 
     for appID in parsed_app_ids:
-        (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
+        app_details, _, _ = steampi.api.load_app_details(appID)
 
         if app_details['type'] == 'game':
 
