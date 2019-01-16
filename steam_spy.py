@@ -79,7 +79,7 @@ def scrape_steam_data():
             time.sleep(wait_time)
             query_count = 0
 
-        (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
+        (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
         if query_status_code is not None:
             query_count += 1
 
@@ -88,7 +88,7 @@ def scrape_steam_data():
             time.sleep(wait_time)
             query_count = 0
 
-            (app_details, is_success, query_status_code) = steampi.api.load_app_details(appID)
+            (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
             if query_status_code is not None:
                 query_count += 1
 
