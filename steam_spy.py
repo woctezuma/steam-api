@@ -67,7 +67,7 @@ def scrape_steam_data():
 
     unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
-    unseen_app_ids = sorted(unseen_app_ids, key=lambda x: int(x))
+    unseen_app_ids = sorted(unseen_app_ids, key=int)
 
     success_filename = get_previously_seen_app_ids_of_games()
     error_filename = get_previously_seen_app_ids_of_non_games()
@@ -107,7 +107,7 @@ def aggregate_steam_data(verbose=True):
 
     parsed_app_ids = load_text_file(success_filename)
 
-    parsed_app_ids = sorted(parsed_app_ids, key=lambda x: int(x))
+    parsed_app_ids = sorted(parsed_app_ids, key=int)
 
     all_possible_info_type = []
 
