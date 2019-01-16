@@ -121,7 +121,7 @@ def aggregate_steam_data(verbose=True):
         if app_details['type'] == 'game':
 
             # Keep track of the kind of info which can be found through Steam API
-            for available_info in app_details.keys():
+            for available_info in app_details:
                 if available_info not in all_possible_info_type:
                     all_possible_info_type.append(available_info)
 
