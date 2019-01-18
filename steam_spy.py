@@ -105,8 +105,8 @@ def chunks(l, n):
 
 
 def scrape_steam_data():
-    query_rate_limit = 10  # Number of queries which can be successfully issued during a 4-minute time window
-    wait_time = 12 + 0.5  # 4 minutes plus a cushion
+    query_rate_limit = 190  # Number of queries which can be successfully issued during a 4-minute time window
+    wait_time = (4 * 60) + 10  # 4 minutes plus a cushion
 
     (steam_catalog, _, _) = load_steam_catalog()
 
