@@ -1,7 +1,9 @@
-import logging
+import asyncio
+import json
 import pathlib
 import time
 
+import aiohttp
 import steampi.api
 import steampi.json_utils
 
@@ -43,23 +45,59 @@ def load_previously_seen_app_ids():
     return previously_seen_app_ids
 
 
-def scrape_steam_data():
-    logging.basicConfig(level=logging.DEBUG)
-    logging.getLogger('requests').setLevel(logging.DEBUG)
-    log = logging.getLogger(__name__)
-
-    query_rate_limit = 200  # Number of queries which can be successfully issued during a 4-minute time window
-    wait_time = (4 * 60) + 10  # 4 minutes plus a cushion
+async def fetch(session, url):
     successful_status_code = 200  # Status code for a successful HTTP response
 
-    query_count = 0
+    async with session.get(url) as response:
+        status_code = response.status
+        if status_code == successful_status_code:
+            result = await response.json()
+        else:
+            result = None
+        return result
 
-    (steam_catalog, is_success, query_status_code) = load_steam_catalog()
 
-    if not is_success:
-        raise AssertionError()
-    if query_status_code is not None:
-        query_count += 1
+async def fetch_steam_data(app_id_batch):
+    # Reference: https://stackoverflow.com/a/50312981
+
+    steam_url = 'http://store.steampowered.com/api/appdetails?appids='
+
+    urls = [
+        steam_url + str(app_id) for app_id in app_id_batch
+    ]
+    tasks = []
+    async with aiohttp.ClientSession() as session:
+        for url in urls:
+            tasks.append(fetch(session, url))
+        jsons = await asyncio.gather(*tasks)
+        print('Saving results to disk.')
+        for (app_id, json_data) in zip(app_id_batch, jsons):
+            if json_data is not None:
+                json_filename = 'data/appdetails/appID_' + str(app_id) + '.json'
+                with open(json_filename, 'w', encoding='utf8') as f:
+                    print(json.dumps(json_data), file=f)
+
+                appid_log_file_name = 'data/successful_appIDs.txt'
+            else:
+                appid_log_file_name = 'data/faulty_appIDs.txt'
+
+            with open(appid_log_file_name, "a") as f:
+                f.write(str(app_id) + '\n')
+    return
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    # Reference: https://stackoverflow.com/a/312464
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def scrape_steam_data():
+    query_rate_limit = 50  # Number of queries which can be successfully issued during a 1-minute time window
+    wait_time = 60 + 2.5  # 1 minute plus a cushion
+
+    (steam_catalog, _, _) = load_steam_catalog()
 
     all_app_ids = list(steam_catalog.keys())
 
@@ -69,37 +107,16 @@ def scrape_steam_data():
 
     unseen_app_ids = sorted(unseen_app_ids, key=int)
 
-    success_filename = get_previously_seen_app_ids_of_games()
-    error_filename = get_previously_seen_app_ids_of_non_games()
+    for app_id_batch in chunks(unseen_app_ids, query_rate_limit):
+        loop = asyncio.get_event_loop()
+        end_time = loop.time() + wait_time
+        loop.run_until_complete(fetch_steam_data(app_id_batch))
+        wait_duration = end_time - loop.time()
 
-    for appID in unseen_app_ids:
+        print('Query limit {} reached. Wait for {:2.2f} seconds.'.format(query_rate_limit, wait_duration))
+        time.sleep(wait_duration)
 
-        if query_count >= query_rate_limit:
-            log.info("query count is %d ; limit %d reached. Wait for %d sec", query_count, query_rate_limit, wait_time)
-            time.sleep(wait_time)
-            query_count = 0
-
-        (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
-        if query_status_code is not None:
-            query_count += 1
-
-        while (query_status_code is not None) and (query_status_code != successful_status_code):
-            log.info("query count is %d ; HTTP response %d. Wait for %d sec", query_count, query_status_code, wait_time)
-            time.sleep(wait_time)
-            query_count = 0
-
-            (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
-            if query_status_code is not None:
-                query_count += 1
-
-        appid_log_file_name = success_filename
-        if (query_status_code is not None) and not is_success:
-            if not (query_status_code == successful_status_code):
-                raise AssertionError()
-            appid_log_file_name = error_filename
-
-        with open(appid_log_file_name, "a") as f:
-            f.write(appID + '\n')
+    return
 
 
 def aggregate_steam_data(verbose=True):
