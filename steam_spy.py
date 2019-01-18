@@ -45,12 +45,14 @@ def load_previously_seen_app_ids():
     return previously_seen_app_ids
 
 
-async def fetch(session, url):
+async def fetch(session, url, params=None):
     successful_status_code = 200  # Status code for a successful HTTP response
 
-    async with session.get(url) as response:
-        status_code = response.status
-        if status_code == successful_status_code:
+    if params is None:
+        params = {}
+
+    async with session.get(url, params=params) as response:
+        if response.status == successful_status_code:
             result = await response.json()
         else:
             result = None
@@ -60,30 +62,39 @@ async def fetch(session, url):
 async def fetch_steam_data(app_id_batch):
     # Reference: https://stackoverflow.com/a/50312981
 
-    steam_url = 'http://store.steampowered.com/api/appdetails?appids='
+    steam_url = 'http://store.steampowered.com/api/appdetails'
 
-    urls = [
-        steam_url + str(app_id) for app_id in app_id_batch
-    ]
     tasks = []
     async with aiohttp.ClientSession() as session:
-        for url in urls:
-            tasks.append(fetch(session, url))
+        for app_id in app_id_batch:
+            params = {'appids': str(app_id)}
+            tasks.append(fetch(session, steam_url, params))
         jsons = await asyncio.gather(*tasks)
-        print('Saving results to disk.')
-        for (app_id, json_data) in zip(app_id_batch, jsons):
-            if json_data is not None:
-                json_filename = 'data/appdetails/appID_' + str(app_id) + '.json'
-                with open(json_filename, 'w', encoding='utf8') as f:
-                    print(json.dumps(json_data), file=f)
 
-                appid_log_file_name = 'data/successful_appIDs.txt'
-            else:
-                appid_log_file_name = 'data/faulty_appIDs.txt'
+    return jsons
 
-            with open(appid_log_file_name, "a") as f:
-                f.write(str(app_id) + '\n')
-    return
+
+def save_steam_data_to_disk(app_id_batch, jsons):
+    print('Saving results to disk.')
+
+    counter = 0
+    for (app_id, json_data) in zip(app_id_batch, jsons):
+        if json_data is not None:
+            json_filename = 'data/appdetails/appID_' + str(app_id) + '.json'
+            with open(json_filename, 'w', encoding='utf8') as f:
+                print(json.dumps(json_data), file=f)
+
+            appid_log_file_name = get_previously_seen_app_ids_of_games()
+            counter += 1
+        else:
+            appid_log_file_name = get_previously_seen_app_ids_of_non_games()
+
+        with open(appid_log_file_name, "a") as f:
+            f.write(str(app_id) + '\n')
+
+    print('{}/{} app details have been saved to disk.'.format(counter, len(app_id_batch)))
+
+    return counter
 
 
 def chunks(l, n):
@@ -109,12 +120,14 @@ def scrape_steam_data():
 
     for app_id_batch in chunks(unseen_app_ids, query_rate_limit):
         loop = asyncio.get_event_loop()
-        end_time = loop.time() + wait_time
-        loop.run_until_complete(fetch_steam_data(app_id_batch))
-        wait_duration = end_time - loop.time()
+        jsons = loop.run_until_complete(fetch_steam_data(app_id_batch))
+        counter = save_steam_data_to_disk(app_id_batch, jsons)
 
-        print('Query limit {} reached. Wait for {:2.2f} seconds.'.format(query_rate_limit, wait_duration))
-        time.sleep(wait_duration)
+        if counter == 0:
+            break
+
+        print('Query limit {} reached. Wait for {} seconds.'.format(query_rate_limit, wait_time))
+        time.sleep(wait_time)
 
     return
 
