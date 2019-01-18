@@ -9,7 +9,7 @@ import steampi.json_utils
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
+from aggregate_steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
 
 
 def load_aggregated_database():
