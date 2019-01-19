@@ -303,10 +303,10 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
         if description_keyword is not None:
             if is_variable_of_interest_numeric:
                 # noinspection PyPep8
-                g = lambda v: int(v)
+                g = int
             else:
                 # noinspection PyPep8
-                g = lambda v: generic_converter(v)
+                g = generic_converter
             features = [g(steam_database[app_id][description_keyword]) for app_id in app_ids]
         else:
             features = app_ids
@@ -325,16 +325,16 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
 
     if statistic_str == 'Median':
         # noinspection PyPep8
-        f = lambda v: np.median(v)
+        f = np.median
     elif statistic_str == 'Average':
         # noinspection PyPep8
-        f = lambda v: np.mean(v)
+        f = np.mean
     elif statistic_str == 'Sum':
         # noinspection PyPep8
-        f = lambda v: np.sum(v)
+        f = np.sum
     else:
         # noinspection PyPep8
-        f = lambda v: len(v)
+        f = len
 
     y = []
     for features in feature_list:
