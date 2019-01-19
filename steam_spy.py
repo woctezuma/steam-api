@@ -75,8 +75,6 @@ async def fetch_steam_data(app_id_batch, wait_time):
             tasks.append(fetch(session, steam_url, params))
         jsons = await asyncio.gather(*tasks)
 
-    await asyncio.gather(fetch_on_cooldown(wait_time), save_steam_data_to_disk(app_id_batch, jsons))
-
     return jsons
 
 
@@ -110,6 +108,16 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
+async def save_steam_data_to_disk_and_wait(app_id_batch, jsons, wait_time):
+    task_save = asyncio.create_task(save_steam_data_to_disk(app_id_batch, jsons))
+    task_cooldown = asyncio.create_task(fetch_on_cooldown(wait_time))
+
+    counter = await task_save
+    await task_cooldown
+
+    return counter
+
+
 def scrape_steam_data():
     query_rate_limit = 200  # Number of queries which can be successfully issued during a 4-minute time window
     wait_time = (4 * 60) + 10  # 4 minutes plus a cushion
@@ -126,9 +134,12 @@ def scrape_steam_data():
 
     total_counter = 0
     for app_id_batch in chunks(unseen_app_ids, query_rate_limit):
-        loop = asyncio.get_event_loop()
-        jsons = loop.run_until_complete(fetch_steam_data(app_id_batch, wait_time))
-        counter = save_steam_data_to_disk(app_id_batch, jsons)
+        jsons = asyncio.run(
+            fetch_steam_data(app_id_batch, wait_time)
+        )
+        counter = asyncio.run(
+            save_steam_data_to_disk_and_wait(app_id_batch, jsons, wait_time)
+        )
 
         if counter == 0:
             print('Total: {} app details have been saved to disk.'.format(total_counter))
