@@ -5,7 +5,7 @@ import steampi.json_utils
 
 
 def download_steam_catalog():
-    url = 'http://api.steampowered.com/ISteamApps/GetAppList/v0002/'
+    url = 'https://api.steampowered.com/ISteamApps/GetAppList/v0002/'
     (data, status_code) = steampi.json_utils.download_json_data(url)
     success_flag = bool(data is not None)
 

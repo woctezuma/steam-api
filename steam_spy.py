@@ -82,7 +82,7 @@ async def fetch_on_cooldown(wait_time):
 async def fetch_steam_data(app_id_batch, wait_time):
     # Reference: https://stackoverflow.com/a/50312981
 
-    steam_url = 'http://store.steampowered.com/api/appdetails'
+    steam_url = 'https://store.steampowered.com/api/appdetails'
 
     api_key = load_api_key()
 
