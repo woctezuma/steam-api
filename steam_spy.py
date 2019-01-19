@@ -1,7 +1,6 @@
 import asyncio
 import json
 import pathlib
-import time
 
 import aiohttp
 import steampi.api
@@ -59,7 +58,12 @@ async def fetch(session, url, params=None):
         return result
 
 
-async def fetch_steam_data(app_id_batch):
+async def fetch_on_cooldown(wait_time):
+    print('Waiting for {} seconds.'.format(wait_time))
+    await asyncio.sleep(wait_time)
+
+
+async def fetch_steam_data(app_id_batch, wait_time):
     # Reference: https://stackoverflow.com/a/50312981
 
     steam_url = 'http://store.steampowered.com/api/appdetails'
@@ -71,10 +75,12 @@ async def fetch_steam_data(app_id_batch):
             tasks.append(fetch(session, steam_url, params))
         jsons = await asyncio.gather(*tasks)
 
+    await asyncio.gather(fetch_on_cooldown(wait_time), save_steam_data_to_disk(app_id_batch, jsons))
+
     return jsons
 
 
-def save_steam_data_to_disk(app_id_batch, jsons):
+async def save_steam_data_to_disk(app_id_batch, jsons):
     print('Saving results to disk.')
 
     counter = 0
@@ -121,7 +127,7 @@ def scrape_steam_data():
     total_counter = 0
     for app_id_batch in chunks(unseen_app_ids, query_rate_limit):
         loop = asyncio.get_event_loop()
-        jsons = loop.run_until_complete(fetch_steam_data(app_id_batch))
+        jsons = loop.run_until_complete(fetch_steam_data(app_id_batch, wait_time))
         counter = save_steam_data_to_disk(app_id_batch, jsons)
 
         if counter == 0:
@@ -129,9 +135,6 @@ def scrape_steam_data():
             break
         else:
             total_counter += counter
-
-        print('Query limit {} reached. Wait for {} seconds.'.format(query_rate_limit, wait_time))
-        time.sleep(wait_time)
 
     return
 
