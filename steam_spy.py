@@ -63,6 +63,7 @@ async def fetch_on_cooldown(wait_time):
     await asyncio.sleep(wait_time)
     print('Resuming.')
 
+
 async def fetch_steam_data(app_id_batch, wait_time):
     # Reference: https://stackoverflow.com/a/50312981
 
