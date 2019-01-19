@@ -61,7 +61,7 @@ async def fetch(session, url, params=None):
 async def fetch_on_cooldown(wait_time):
     print('Waiting for {} seconds.'.format(wait_time))
     await asyncio.sleep(wait_time)
-
+    print('Resuming.')
 
 async def fetch_steam_data(app_id_batch, wait_time):
     # Reference: https://stackoverflow.com/a/50312981
