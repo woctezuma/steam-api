@@ -598,14 +598,13 @@ def get_steam_database(verbosity=True):
 
     steam_database = fill_in_drm_support(steam_database)
 
-    # noinspection PyUnusedLocal
-    keywords = get_description_keywords(steam_database, verbose=verbosity)
+    _ = get_description_keywords(steam_database, verbose=verbosity)
 
     return steam_database, categories, genres
 
 
 def get_steam_calendar(steam_database, verbosity=False):
-    release_calendar, weird_dates = build_steam_calendar(steam_database, verbose=verbosity)
+    release_calendar, _ = build_steam_calendar(steam_database, verbose=verbosity)
 
     release_calendar = simplify_calendar(release_calendar)
 

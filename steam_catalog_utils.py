@@ -63,7 +63,7 @@ def load_steam_catalog():
 
 
 def main():
-    (steam_catalog, is_success, query_status_code) = load_steam_catalog()
+    (_, _, _) = load_steam_catalog()
     return True
 
 
