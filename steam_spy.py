@@ -44,6 +44,21 @@ def load_previously_seen_app_ids():
     return previously_seen_app_ids
 
 
+def load_api_key(api_key_filename=None):
+    if api_key_filename is None:
+        api_key_filename = 'api_key.txt'
+
+    try:
+        with open(api_key_filename, 'r') as f:
+            data = f.readlines()
+        api_key = data[0]
+
+    except FileNotFoundError:
+        api_key = None
+
+    return api_key
+
+
 async def fetch(session, url, params=None):
     successful_status_code = 200  # Status code for a successful HTTP response
 
@@ -69,10 +84,17 @@ async def fetch_steam_data(app_id_batch, wait_time):
 
     steam_url = 'http://store.steampowered.com/api/appdetails'
 
+    api_key = load_api_key()
+
+    if api_key is None:
+        params = {}
+    else:
+        params = {'key': api_key}
+
     tasks = []
     async with aiohttp.ClientSession() as session:
         for app_id in app_id_batch:
-            params = {'appids': str(app_id)}
+            params['appids'] = str(app_id)
             tasks.append(fetch(session, steam_url, params))
         jsons = await asyncio.gather(*tasks)
 
