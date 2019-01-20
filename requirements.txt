@@ -4,5 +4,5 @@ requests==2.21.0
 scipy==1.2.0
 sklearn==0.0
 umap-learn==0.3.7
-steampi==0.2.4
+steampi==0.4
 aiohttp
