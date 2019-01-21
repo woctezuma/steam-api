@@ -30,13 +30,17 @@ def load_text_file(file_name):
     return file_content
 
 
-def load_previously_seen_app_ids():
+def load_previously_seen_app_ids(include_faulty_app_ids=True):
     previously_seen_app_ids = set()
 
     success_filename = get_previously_seen_app_ids_of_games()
     error_filename = get_previously_seen_app_ids_of_non_games()
 
-    for appid_log_file_name in [success_filename, error_filename]:
+    filename_list = [success_filename]
+    if include_faulty_app_ids:
+        filename_list.append(error_filename)
+
+    for appid_log_file_name in filename_list:
         parsed_app_ids = load_text_file(appid_log_file_name)
         previously_seen_app_ids = previously_seen_app_ids.union(parsed_app_ids)
 
