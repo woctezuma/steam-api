@@ -4,6 +4,7 @@ import time
 
 import steampi.api
 import steampi.json_utils
+import steamspypi
 
 from steam_catalog_utils import load_steam_catalog
 
@@ -66,7 +67,6 @@ def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids
         if query_status_code is not None:
             query_count += 1
     else:
-        import steamspypi
         steam_catalog = steamspypi.load()
 
     all_app_ids = list(steam_catalog.keys())
