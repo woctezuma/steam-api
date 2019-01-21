@@ -47,7 +47,7 @@ def load_previously_seen_app_ids(include_faulty_app_ids=True):
     return previously_seen_app_ids
 
 
-def scrape_steam_data():
+def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids=False):
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('requests').setLevel(logging.DEBUG)
     log = logging.getLogger(__name__)
@@ -58,7 +58,6 @@ def scrape_steam_data():
 
     query_count = 0
 
-    import_my_own_steam_catalog = True
     if import_my_own_steam_catalog:
         (steam_catalog, is_success, query_status_code) = load_steam_catalog()
 
@@ -72,7 +71,8 @@ def scrape_steam_data():
 
     all_app_ids = list(steam_catalog.keys())
 
-    previously_seen_app_ids = load_previously_seen_app_ids()
+    include_faulty_app_ids = not try_again_faulty_app_ids
+    previously_seen_app_ids = load_previously_seen_app_ids(include_faulty_app_ids=include_faulty_app_ids)
 
     unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
