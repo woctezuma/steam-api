@@ -58,12 +58,17 @@ def scrape_steam_data():
 
     query_count = 0
 
-    (steam_catalog, is_success, query_status_code) = load_steam_catalog()
+    import_my_own_steam_catalog = True
+    if import_my_own_steam_catalog:
+        (steam_catalog, is_success, query_status_code) = load_steam_catalog()
 
-    if not is_success:
-        raise AssertionError()
-    if query_status_code is not None:
-        query_count += 1
+        if not is_success:
+            raise AssertionError()
+        if query_status_code is not None:
+            query_count += 1
+    else:
+        import steamspypi
+        steam_catalog = steamspypi.load()
 
     all_app_ids = list(steam_catalog.keys())
 
