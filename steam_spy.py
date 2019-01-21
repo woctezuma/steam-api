@@ -124,4 +124,4 @@ def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids
 
 if __name__ == '__main__':
     print('Scraping data from the web')
-    scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids=False)
+    scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids=False, focus_on_probable_games=True)
