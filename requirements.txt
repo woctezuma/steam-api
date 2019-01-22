@@ -5,4 +5,4 @@ scipy==1.2.0
 sklearn==0.0
 umap-learn==0.3.7
 steampi==0.4.0
-steamspypi=1.0.0
+steamspypi==1.0.0
