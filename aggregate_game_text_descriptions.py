@@ -61,10 +61,24 @@ def aggregate_game_descriptions_from_steam_data(output_filename='aggregate.json'
             if 'English' in parsed_supported_languages:
                 app_description = app_details[game_description_label]
 
+                try:
+                    app_genres = [genre['description'] for genre in app_details['genres']]
+                except KeyError:
+                    print('Missing genre description for appID = {} ({})'.format(app_id, app_name))
+                    app_genres = []
+
+                try:
+                    app_categories = [categorie['description'] for categorie in app_details['categories']]
+                except KeyError:
+                    print('Missing categorie description for appID = {} ({})'.format(app_id, app_name))
+                    app_categories = []
+
                 if len(app_description) > 0:
                     aggregate[app_id] = dict()
                     aggregate[app_id]['name'] = app_name
                     aggregate[app_id]['text'] = app_description
+                    aggregate[app_id]['genres'] = app_genres
+                    aggregate[app_id]['categories'] = app_categories
             else:
                 if verbose:
                     print('English not supported for appID = {} ({})'.format(app_id, app_name))
