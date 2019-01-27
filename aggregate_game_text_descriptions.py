@@ -16,6 +16,9 @@ def aggregate_game_descriptions_from_steam_data(output_filename='aggregate.json'
     # Variable used for debugging
     app_id_errors = list()
 
+    # Label for the text below the banner on the store page. If empty, 'about_the_game' is used.
+    game_header_label = 'short_description'
+    # Label for the text in the section called "About the game" on the store page
     game_description_label = 'about_the_game'
 
     successful_app_id_filename = get_previously_seen_app_ids_of_games()
@@ -59,7 +62,11 @@ def aggregate_game_descriptions_from_steam_data(output_filename='aggregate.json'
 
             parsed_supported_languages = re.split(r'\W+', supported_languages)
             if 'English' in parsed_supported_languages:
+
+                app_header = app_details[game_header_label]
                 app_description = app_details[game_description_label]
+
+                app_text = app_header + ' ' + app_description
 
                 try:
                     app_genres = [genre['description'] for genre in app_details['genres']]
@@ -73,10 +80,10 @@ def aggregate_game_descriptions_from_steam_data(output_filename='aggregate.json'
                     print('Missing categorie description for appID = {} ({})'.format(app_id, app_name))
                     app_categories = []
 
-                if len(app_description) > 0:
+                if len(app_text) > 0:
                     aggregate[app_id] = dict()
                     aggregate[app_id]['name'] = app_name
-                    aggregate[app_id]['text'] = app_description
+                    aggregate[app_id]['text'] = app_text
                     aggregate[app_id]['genres'] = app_genres
                     aggregate[app_id]['categories'] = app_categories
             else:
