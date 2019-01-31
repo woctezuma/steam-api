@@ -12,11 +12,22 @@
 
 This repository contains Python code to download data through Steam API.
 
-## Data ##
+## Data
 
 Data is available as a snapshot in [another repository](https://github.com/woctezuma/steam-api-data).
 
-## Plots ##
+## Usage
+
+-   To download app details of Steam games, run:
+```bash
+python steam_spy.py
+```
+-   To aggregate the store descriptions of games, as extracted from app details, run:
+```bash
+python aggregate_game_text_descriptions.py
+```
+
+## Plots
 
 ### Store attributes
 
