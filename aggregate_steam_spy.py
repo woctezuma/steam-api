@@ -20,6 +20,10 @@ def aggregate_steam_data(verbose=True):
     for appID in parsed_app_ids:
         app_details, _, _ = steampi.api.load_app_details(appID)
 
+        if 'type' not in app_details:
+            print('AppID {} does not have a "type" key, so we cannot check whether it matches a game.'.format(appID))
+            continue
+
         if app_details['type'] == 'game':
 
             # Keep track of the kind of info which can be found through Steam API
