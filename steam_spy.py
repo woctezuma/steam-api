@@ -48,7 +48,10 @@ def load_previously_seen_app_ids(include_faulty_app_ids=True):
     return previously_seen_app_ids
 
 
-def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids=False, focus_on_probable_games=False):
+def scrape_steam_data(import_my_own_steam_catalog=True,
+                      try_again_faulty_app_ids=False,
+                      allow_to_overwrite_existing_app_details=False,
+                      focus_on_probable_games=False):
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('requests').setLevel(logging.DEBUG)
     log = logging.getLogger(__name__)
@@ -99,7 +102,14 @@ def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids
             time.sleep(wait_time)
             query_count = 0
 
-        (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
+        if allow_to_overwrite_existing_app_details:
+            (loaded_app_details, is_success, query_status_code) = steampi.api.download_app_details(appID)
+            if is_success:
+                json_filename = steampi.api.get_appdetails_filename(appID)
+                steampi.json_utils.save_json_data(json_filename, loaded_app_details)
+        else:
+            (_, is_success, query_status_code) = steampi.api.load_app_details(appID)
+
         if query_status_code is not None:
             query_count += 1
 
@@ -124,4 +134,7 @@ def scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids
 
 if __name__ == '__main__':
     print('Scraping data from the web')
-    scrape_steam_data(import_my_own_steam_catalog=True, try_again_faulty_app_ids=False, focus_on_probable_games=True)
+    scrape_steam_data(import_my_own_steam_catalog=True,
+                      try_again_faulty_app_ids=False,
+                      allow_to_overwrite_existing_app_details=False,
+                      focus_on_probable_games=True)
