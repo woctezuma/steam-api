@@ -38,19 +38,19 @@ python aggregate_steam_spy.py
 python aggregate_game_text_descriptions.py
 ```
 
-- To plot data for each store attribute, categorie, and genre:
+- To plot data for each store attribute, categorie, and genre, run:
 
 ```bash
 python analyze_steam_database.py
 ```
 
-- To visualize categories and genres, with a 2D embedding ([t-SNE](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding) or [UMAP](https://github.com/lmcinnes/umap)):
+- To visualize categories and genres, with a 2D embedding ([t-SNE](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding) or [UMAP](https://github.com/lmcinnes/umap)), run:
 
 ```bash
 python build_tag_map.py
 ```
 
-## Plots
+## Results
 
 ### Store attributes
 
