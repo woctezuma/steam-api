@@ -44,7 +44,7 @@ python aggregate_game_text_descriptions.py
 python analyze_steam_database.py
 ```
 
-- To visualize categories and genres, with a 2D embedding ([t-SNE](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding) or [UMAP](https://github.com/lmcinnes/umap)), run:
+- To visualize categories and genres, with a 2D embedding (t-SNE ([author's FAQ][tsne-author], [wikipedia][tsne-wiki]) or [UMAP][umap-code]), run:
 
 ```bash
 python build_tag_map.py
@@ -71,3 +71,7 @@ Confidence intervals can be found in [`plots_categories_and_genres_with_confiden
 ## Addendum
 
 If you like these stats, [check out my other repository](https://github.com/woctezuma/humble-monthly) with a focus on Humble Monthly bundles.
+
+[tsne-author]: <https://lvdmaaten.github.io/tsne/>
+[tsne-wiki]: <https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding>
+[umap-code]: <https://github.com/lmcinnes/umap>
