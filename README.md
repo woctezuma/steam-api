@@ -3,8 +3,8 @@
 [![Build status][Build image]][Build]
 [![Code coverage][Codecov image]][Codecov]
 
-  [Build]: https://travis-ci.org/woctezuma/steam-api
-  [Build image]: https://travis-ci.org/woctezuma/steam-api.svg?branch=master
+  [Build]: <https://github.com/woctezuma/steam-api/actions>
+  [Build image]: <https://github.com/woctezuma/steam-api/workflows/Python package/badge.svg?branch=master>
 
   [PyUp]: https://pyup.io/repos/github/woctezuma/steam-api/
   [Dependency image]: https://pyup.io/repos/github/woctezuma/steam-api/shield.svg
