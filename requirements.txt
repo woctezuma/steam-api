@@ -1,6 +1,6 @@
 matplotlib==3.6.3
 numpy==1.22.0
-requests==2.22.0
+requests==2.28.2
 scipy==1.10.0
 scikit-learn
 umap-learn==0.5.3
