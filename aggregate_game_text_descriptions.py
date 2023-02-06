@@ -3,7 +3,7 @@ import re
 
 import steampi.api
 
-from steam_spy import load_text_file, get_previously_seen_app_ids_of_games
+from steam_spy import get_previously_seen_app_ids_of_games, load_text_file
 
 
 def aggregate_game_descriptions_from_steam_data(
@@ -11,13 +11,13 @@ def aggregate_game_descriptions_from_steam_data(
     verbose=True,
 ):
     try:
-        with open(output_filename, "r") as f:
+        with open(output_filename) as f:
             aggregate = json.load(f)
     except FileNotFoundError:
-        aggregate = dict()
+        aggregate = {}
 
     # Variable used for debugging
-    app_id_errors = list()
+    app_id_errors = []
 
     # Label for the text below the banner on the store page. If empty, 'about_the_game' is used.
     game_header_label = 'short_description'
@@ -37,12 +37,12 @@ def aggregate_game_descriptions_from_steam_data(
             app_name = app_details['name']
         except KeyError:
             if verbose:
-                print('Name not found for appID = {}'.format(app_id))
+                print(f'Name not found for appID = {app_id}')
                 app_id_errors.append(app_id)
             continue
         except TypeError:
             if verbose:
-                print('File empty for appID = {}'.format(app_id))
+                print(f'File empty for appID = {app_id}')
                 app_id_errors.append(app_id)
             continue
 
@@ -50,7 +50,7 @@ def aggregate_game_descriptions_from_steam_data(
             app_type = app_details['type']
         except KeyError:
             if verbose:
-                print('Missing type for appID = {} ({})'.format(app_id, app_name))
+                print(f'Missing type for appID = {app_id} ({app_name})')
                 app_id_errors.append(app_id)
             continue
 
@@ -103,7 +103,7 @@ def aggregate_game_descriptions_from_steam_data(
                     app_categories = []
 
                 if len(app_text) > 0:
-                    aggregate[app_id] = dict()
+                    aggregate[app_id] = {}
                     aggregate[app_id]['name'] = app_name
                     aggregate[app_id]['text'] = app_text
                     aggregate[app_id]['genres'] = app_genres

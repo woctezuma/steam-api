@@ -11,8 +11,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from aggregate_steam_spy import (
-    get_steam_database_filename,
     get_steam_categories_filename,
+    get_steam_database_filename,
     get_steam_genres_filename,
 )
 
@@ -43,7 +43,7 @@ def get_description_keywords(steam_database, verbose=False):
 def build_steam_calendar(steam_database, verbose=False):
     # Objective: build a calendar of game releases, as a dict: datetime -> list of appIDs
 
-    release_calendar = dict()
+    release_calendar = {}
     weird_release_dates = set()
     weird_counter = 0
 
@@ -226,7 +226,7 @@ def plot_x_y_time_series(
 def simplify_calendar(release_calendar):
     # Objective: merge daily dates into monthly dates
 
-    merged_calendar = dict()
+    merged_calendar = {}
     for release_date in release_calendar:
         merged_release_date = datetime.date(release_date.year, release_date.month, 1)
         try:

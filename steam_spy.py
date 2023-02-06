@@ -23,8 +23,8 @@ def get_previously_seen_app_ids_of_non_games():
 
 def load_text_file(file_name):
     try:
-        with open(file_name, "r") as f:
-            file_content = set([line.strip() for line in f])
+        with open(file_name) as f:
+            file_content = {line.strip() for line in f}
     except FileNotFoundError:
         file_content = []
         pathlib.Path(file_name).touch()

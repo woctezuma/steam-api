@@ -1,7 +1,7 @@
 import steampi.api
 import steampi.json_utils
 
-from steam_spy import load_text_file, get_previously_seen_app_ids_of_games
+from steam_spy import get_previously_seen_app_ids_of_games, load_text_file
 
 
 def aggregate_steam_data(verbose=True):

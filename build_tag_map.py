@@ -108,10 +108,7 @@ def plot_embedding(
             verticalalignment = 'top'
             y = y - delta_font
 
-        if label in highlighted_tags:
-            my_color = "red"
-        else:
-            my_color = "black"
+        my_color = "red" if label in highlighted_tags else "black"
 
         my_font_size = "xx-small"
         my_weight = 'normal'
