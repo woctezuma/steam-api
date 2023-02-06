@@ -48,10 +48,12 @@ def load_previously_seen_app_ids(include_faulty_app_ids=True):
     return previously_seen_app_ids
 
 
-def scrape_steam_data(import_my_own_steam_catalog=True,
-                      try_again_faulty_app_ids=False,
-                      allow_to_overwrite_existing_app_details=False,
-                      focus_on_probable_games=False):
+def scrape_steam_data(
+    import_my_own_steam_catalog=True,
+    try_again_faulty_app_ids=False,
+    allow_to_overwrite_existing_app_details=False,
+    focus_on_probable_games=False,
+):
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('requests').setLevel(logging.DEBUG)
     log = logging.getLogger(__name__)
@@ -86,7 +88,9 @@ def scrape_steam_data(import_my_own_steam_catalog=True,
         all_app_ids = [app_id for app_id in all_app_ids if app_id.endswith('0')]
 
     include_faulty_app_ids = not try_again_faulty_app_ids
-    previously_seen_app_ids = load_previously_seen_app_ids(include_faulty_app_ids=include_faulty_app_ids)
+    previously_seen_app_ids = load_previously_seen_app_ids(
+        include_faulty_app_ids=include_faulty_app_ids,
+    )
 
     unseen_app_ids = set(all_app_ids).difference(previously_seen_app_ids)
 
@@ -96,14 +100,22 @@ def scrape_steam_data(import_my_own_steam_catalog=True,
     error_filename = get_previously_seen_app_ids_of_non_games()
 
     for appID in unseen_app_ids:
-
         if query_count >= query_rate_limit:
-            log.info("query count is %d ; limit %d reached. Wait for %d sec", query_count, query_rate_limit, wait_time)
+            log.info(
+                "query count is %d ; limit %d reached. Wait for %d sec",
+                query_count,
+                query_rate_limit,
+                wait_time,
+            )
             time.sleep(wait_time)
             query_count = 0
 
         if allow_to_overwrite_existing_app_details:
-            (loaded_app_details, is_success, query_status_code) = steampi.api.download_app_details(appID)
+            (
+                loaded_app_details,
+                is_success,
+                query_status_code,
+            ) = steampi.api.download_app_details(appID)
             if is_success:
                 json_filename = steampi.api.get_appdetails_filename(appID)
                 steampi.json_utils.save_json_data(json_filename, loaded_app_details)
@@ -113,8 +125,15 @@ def scrape_steam_data(import_my_own_steam_catalog=True,
         if query_status_code is not None:
             query_count += 1
 
-        while (query_status_code is not None) and (query_status_code != successful_status_code):
-            log.info("query count is %d ; HTTP response %d. Wait for %d sec", query_count, query_status_code, wait_time)
+        while (query_status_code is not None) and (
+            query_status_code != successful_status_code
+        ):
+            log.info(
+                "query count is %d ; HTTP response %d. Wait for %d sec",
+                query_count,
+                query_status_code,
+                wait_time,
+            )
             time.sleep(wait_time)
             query_count = 0
 
@@ -134,7 +153,9 @@ def scrape_steam_data(import_my_own_steam_catalog=True,
 
 if __name__ == '__main__':
     print('Scraping data from the web')
-    scrape_steam_data(import_my_own_steam_catalog=True,
-                      try_again_faulty_app_ids=False,
-                      allow_to_overwrite_existing_app_details=False,
-                      focus_on_probable_games=True)
+    scrape_steam_data(
+        import_my_own_steam_catalog=True,
+        try_again_faulty_app_ids=False,
+        allow_to_overwrite_existing_app_details=False,
+        focus_on_probable_games=True,
+    )

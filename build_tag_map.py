@@ -3,6 +3,7 @@
 
 import numpy as np
 import umap
+
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -33,10 +34,16 @@ def preprocess_data(steam_database, categories_dict, genres_dict):
     game_counter = 0
 
     for appid in steam_database:
-        categories = [categories_dict[str(i)] for i in steam_database[appid]['categories']
-                      if str(i) in categories_dict]
-        genres = [genres_dict[str(i)] for i in steam_database[appid]['genres']
-                  if str(i) in genres_dict]
+        categories = [
+            categories_dict[str(i)]
+            for i in steam_database[appid]['categories']
+            if str(i) in categories_dict
+        ]
+        genres = [
+            genres_dict[str(i)]
+            for i in steam_database[appid]['genres']
+            if str(i) in genres_dict
+        ]
 
         current_tags = categories
         current_tags.extend(genres)
@@ -53,7 +60,14 @@ def preprocess_data(steam_database, categories_dict, genres_dict):
 
 # Scale and visualize the embedding vectors
 # noinspection PyPep8Naming
-def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted_tags=None, delta_font=0.003):
+def plot_embedding(
+    X,
+    str_list,
+    base_plot_filename=None,
+    title=None,
+    highlighted_tags=None,
+    delta_font=0.003,
+):
     if highlighted_tags is None:
         highlighted_tags = []
 
@@ -74,9 +88,7 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
     # References:
     # * https://stackoverflow.com/a/40729950/
     # * http://scikit-learn.org/stable/auto_examples/applications/plot_stock_market.html
-    for index, (label, x, y) in enumerate(
-            zip(str_list, X[:, 0], X[:, 1])):
-
+    for index, (label, x, y) in enumerate(zip(str_list, X[:, 0], X[:, 1])):
         dx = x - X[:, 0]
         dx[index] = 1
         dy = y - X[:, 1]
@@ -105,10 +117,20 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
         my_weight = 'normal'
         my_stretch = "condensed"
 
-        ax.text(x, y, label, color=my_color,
-                horizontalalignment=horizontalalignment,
-                verticalalignment=verticalalignment,
-                fontdict={'family': 'serif', 'weight': my_weight, 'size': my_font_size, 'stretch': my_stretch})
+        ax.text(
+            x,
+            y,
+            label,
+            color=my_color,
+            horizontalalignment=horizontalalignment,
+            verticalalignment=verticalalignment,
+            fontdict={
+                'family': 'serif',
+                'weight': my_weight,
+                'size': my_font_size,
+                'stretch': my_stretch,
+            },
+        )
 
     ax.set_xticks([])
     ax.set_yticks([])
@@ -121,14 +143,25 @@ def plot_embedding(X, str_list, base_plot_filename=None, title=None, highlighted
     return
 
 
-def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None,
-                    highlighted_tags=None):
+def display_tag_map(
+    embedding,
+    tags_list,
+    base_plot_filename=None,
+    my_title=None,
+    highlighted_tags=None,
+):
     if highlighted_tags is None:
         highlighted_tags = []
 
     if len(highlighted_tags) == 0:
-        highlighted_tags = ['Early Access', 'Free to Play', 'In-App Purchases', 'Steam Trading Cards',
-                            'Violent', 'Gore']
+        highlighted_tags = [
+            'Early Access',
+            'Free to Play',
+            'In-App Purchases',
+            'Steam Trading Cards',
+            'Violent',
+            'Gore',
+        ]
 
     plot_embedding(embedding, tags_list, base_plot_filename, my_title, highlighted_tags)
 
@@ -137,9 +170,20 @@ def display_tag_map(embedding, tags_list, base_plot_filename=None, my_title=None
 
 def compute_tag_map(tag_joint_game_matrix, embedding_name='t-SNE'):
     if embedding_name == 't-SNE':
-        embedding = TSNE(n_components=2, random_state=0, verbose=2, init='pca', metric='correlation')
+        embedding = TSNE(
+            n_components=2,
+            random_state=0,
+            verbose=2,
+            init='pca',
+            metric='correlation',
+        )
     else:
-        embedding = umap.UMAP(n_neighbors=20, min_dist=0.15, metric='correlation', verbose=True)
+        embedding = umap.UMAP(
+            n_neighbors=20,
+            min_dist=0.15,
+            metric='correlation',
+            verbose=True,
+        )
 
     embedded_data = embedding.fit_transform(tag_joint_game_matrix)
 
@@ -147,18 +191,32 @@ def compute_tag_map(tag_joint_game_matrix, embedding_name='t-SNE'):
 
 
 def main():
-    steamspy_database, all_categories_dict, all_genres_dict = get_steam_database(verbosity=False)
+    steamspy_database, all_categories_dict, all_genres_dict = get_steam_database(
+        verbosity=False,
+    )
 
-    joint_matrix, tags_list_sorted = preprocess_data(steamspy_database, all_categories_dict, all_genres_dict)
+    joint_matrix, tags_list_sorted = preprocess_data(
+        steamspy_database,
+        all_categories_dict,
+        all_genres_dict,
+    )
 
     method_name = 't-SNE'  # Either 't-SNE' or 'u-MAP'
     tag_embedding = compute_tag_map(joint_matrix, embedding_name=method_name)
 
     plot_filename = 'tag_map.png'
-    plot_title = '{} plot of categories (in black) and genres (in red)'.format(method_name)
+    plot_title = '{} plot of categories (in black) and genres (in red)'.format(
+        method_name,
+    )
     red_tags = list(all_genres_dict.values())
 
-    display_tag_map(tag_embedding, tags_list_sorted, plot_filename, plot_title, red_tags)
+    display_tag_map(
+        tag_embedding,
+        tags_list_sorted,
+        plot_filename,
+        plot_title,
+        red_tags,
+    )
 
     return True
 

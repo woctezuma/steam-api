@@ -12,7 +12,6 @@ def download_steam_catalog():
     downloaded_steam_catalog = {}
 
     if success_flag:
-
         # noinspection SpellCheckingInspection
         for app in data['applist']['apps']:
             # noinspection SpellCheckingInspection

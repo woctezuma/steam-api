@@ -21,11 +21,14 @@ def aggregate_steam_data(verbose=True):
         app_details, _, _ = steampi.api.load_app_details(appID)
 
         if app_details is None or 'type' not in app_details:
-            print('AppID {} does not have a "type" key, so we cannot check whether it matches a game.'.format(appID))
+            print(
+                'AppID {} does not have a "type" key, so we cannot check whether it matches a game.'.format(
+                    appID,
+                ),
+            )
             continue
 
         if app_details['type'] == 'game':
-
             # Keep track of the kind of info which can be found through Steam API
             for available_info in app_details:
                 if available_info not in all_possible_info_type:
@@ -45,7 +48,9 @@ def aggregate_steam_data(verbose=True):
             steam_database[appID]['publishers'] = app_details['publishers']
 
             try:
-                steam_database[appID]['price_overview'] = app_details['price_overview']['initial']
+                steam_database[appID]['price_overview'] = app_details['price_overview'][
+                    'initial'
+                ]
             except KeyError:
                 steam_database[appID]['price_overview'] = None
 
@@ -57,7 +62,9 @@ def aggregate_steam_data(verbose=True):
                 steam_database[appID]['metacritic'] = None
 
             try:
-                steam_database[appID]['categories'] = [categorie['id'] for categorie in app_details['categories']]
+                steam_database[appID]['categories'] = [
+                    categorie['id'] for categorie in app_details['categories']
+                ]
 
                 d = {}
                 for elem in app_details['categories']:
@@ -70,7 +77,9 @@ def aggregate_steam_data(verbose=True):
                 steam_database[appID]['categories'] = []
 
             try:
-                steam_database[appID]['genres'] = [int(genre['id']) for genre in app_details['genres']]
+                steam_database[appID]['genres'] = [
+                    int(genre['id']) for genre in app_details['genres']
+                ]
 
                 d = {}
                 for elem in app_details['genres']:
@@ -83,19 +92,25 @@ def aggregate_steam_data(verbose=True):
                 steam_database[appID]['genres'] = []
 
             try:
-                steam_database[appID]['recommendations'] = app_details['recommendations']['total']
+                steam_database[appID]['recommendations'] = app_details[
+                    'recommendations'
+                ]['total']
             except KeyError:
                 steam_database[appID]['recommendations'] = 0
 
             try:
-                steam_database[appID]['achievements'] = app_details['achievements']['total']
+                steam_database[appID]['achievements'] = app_details['achievements'][
+                    'total'
+                ]
             except KeyError:
                 steam_database[appID]['achievements'] = 0
 
             release_info = app_details['release_date']
             steam_database[appID]['release_date'] = {}
             steam_database[appID]['release_date']['date'] = release_info['date']
-            steam_database[appID]['release_date']['is_released'] = not (release_info['coming_soon'])
+            steam_database[appID]['release_date']['is_released'] = not (
+                release_info['coming_soon']
+            )
 
             try:
                 steam_database[appID]['dlc'] = len(app_details['dlc'])
@@ -104,14 +119,18 @@ def aggregate_steam_data(verbose=True):
 
             steam_database[appID]['demos'] = bool('demos' in app_details)
 
-            steam_database[appID]['controller_support'] = bool('controller_support' in app_details)
+            steam_database[appID]['controller_support'] = bool(
+                'controller_support' in app_details,
+            )
 
             try:
                 steam_database[appID]['drm_notice'] = app_details['drm_notice']
             except KeyError:
                 steam_database[appID]['drm_notice'] = None
 
-            steam_database[appID]['ext_user_account_notice'] = bool('ext_user_account_notice' in app_details)
+            steam_database[appID]['ext_user_account_notice'] = bool(
+                'ext_user_account_notice' in app_details,
+            )
 
     if verbose:
         print('All possible pieces of information which can be fetched via Steam API:')

@@ -5,11 +5,16 @@ from math import sqrt
 import matplotlib.dates as mdates
 import numpy as np
 import steampi.json_utils
+
 # Reference: https://stackoverflow.com/a/3054314
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from aggregate_steam_spy import get_steam_database_filename, get_steam_categories_filename, get_steam_genres_filename
+from aggregate_steam_spy import (
+    get_steam_database_filename,
+    get_steam_categories_filename,
+    get_steam_genres_filename,
+)
 
 
 def load_aggregated_database():
@@ -51,33 +56,59 @@ def build_steam_calendar(steam_database, verbose=False):
         if not is_released:
             continue
 
-        release_date_as_str = release_date_as_str.replace(',', '')  # "Nov 11, 2017" == "Nov 11 2017"
-        release_date_as_str = release_date_as_str.replace('сен.', 'September')  # Specifically for appID=689740
+        release_date_as_str = release_date_as_str.replace(
+            ',',
+            '',
+        )  # "Nov 11, 2017" == "Nov 11 2017"
+        release_date_as_str = release_date_as_str.replace(
+            'сен.',
+            'September',
+        )  # Specifically for appID=689740
 
         try:
             # Reference: https://stackoverflow.com/a/6557568/
-            release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%b %d %Y')
+            release_date_as_datetime = datetime.datetime.strptime(
+                release_date_as_str,
+                '%b %d %Y',
+            )
         except ValueError:
             try:
-                release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%d %b %Y')
+                release_date_as_datetime = datetime.datetime.strptime(
+                    release_date_as_str,
+                    '%d %b %Y',
+                )
             except ValueError:
                 try:
-                    release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%B %d %Y')
+                    release_date_as_datetime = datetime.datetime.strptime(
+                        release_date_as_str,
+                        '%B %d %Y',
+                    )
                 except ValueError:
                     try:
-                        release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%d %B %Y')
+                        release_date_as_datetime = datetime.datetime.strptime(
+                            release_date_as_str,
+                            '%d %B %Y',
+                        )
                     except ValueError:
                         try:
-                            release_date_as_datetime = datetime.datetime.strptime(release_date_as_str, '%b %Y')
+                            release_date_as_datetime = datetime.datetime.strptime(
+                                release_date_as_str,
+                                '%b %Y',
+                            )
                         except ValueError:
                             weird_release_dates.add(release_date_as_str)
                             weird_counter += 1
                             if verbose:
                                 if weird_counter == 1:
-                                    print('\nGames being sold with weird release dates:')
+                                    print(
+                                        '\nGames being sold with weird release dates:',
+                                    )
                                 if steam_database[appID]['price_overview'] is not None:
                                     if not (steam_database[appID]['is_free']):
-                                        sentence = 'appID={0:6}\t' + steam_database[appID]['name']
+                                        sentence = (
+                                            'appID={0:6}\t'
+                                            + steam_database[appID]['name']
+                                        )
                                         print(sentence.format(appID))
                             continue
 
@@ -105,17 +136,18 @@ def get_full_plot_filename(base_plot_filename):
     return full_plot_filename
 
 
-def get_x_y_time_series(release_calendar,
-                        steam_database=None,
-                        description_keyword=None,
-                        starting_year=None):
+def get_x_y_time_series(
+    release_calendar,
+    steam_database=None,
+    description_keyword=None,
+    starting_year=None,
+):
     x_list = []
     y_raw_list = []
 
     all_release_dates = sorted(list(release_calendar.keys()))
 
     for release_date in all_release_dates:
-
         if starting_year is not None and release_date.year < starting_year:
             # Skip release dates prior to the input starting year
             continue
@@ -125,7 +157,11 @@ def get_x_y_time_series(release_calendar,
         if description_keyword is None:
             selected_app_ids = app_ids
         else:
-            selected_app_ids = [app_id for app_id in app_ids if steam_database[app_id][description_keyword] is not None]
+            selected_app_ids = [
+                app_id
+                for app_id in app_ids
+                if steam_database[app_id][description_keyword] is not None
+            ]
 
         if len(selected_app_ids) == 0:
             continue
@@ -136,14 +172,17 @@ def get_x_y_time_series(release_calendar,
     return x_list, y_raw_list
 
 
-def plot_x_y_time_series(x_list, y_list,
-                         chosen_title=None,
-                         chosen_ylabel=None,
-                         base_plot_filename=None,
-                         month_formatting=False,
-                         is_variable_of_interest_numeric=True,
-                         max_ordinate=None,
-                         confidence_interval_data=None):
+def plot_x_y_time_series(
+    x_list,
+    y_list,
+    chosen_title=None,
+    chosen_ylabel=None,
+    base_plot_filename=None,
+    month_formatting=False,
+    is_variable_of_interest_numeric=True,
+    max_ordinate=None,
+    confidence_interval_data=None,
+):
     fig = Figure(dpi=300)
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
@@ -151,11 +190,13 @@ def plot_x_y_time_series(x_list, y_list,
     if confidence_interval_data is None or len(confidence_interval_data) == 0:
         ax.plot(x_list, y_list)
     else:
-        plot_mean_and_confidence_interval(ax,
-                                          confidence_interval_data['mean'],
-                                          confidence_interval_data['lb'],
-                                          confidence_interval_data['ub'],
-                                          x_list)
+        plot_mean_and_confidence_interval(
+            ax,
+            confidence_interval_data['mean'],
+            confidence_interval_data['lb'],
+            confidence_interval_data['ub'],
+            x_list,
+        )
     if chosen_title is not None:
         ax.set_title(chosen_title)
     ax.set_xlabel('Date')
@@ -219,7 +260,15 @@ def remove_current_date(release_calendar):
     return filtered_calendar
 
 
-def plot_mean_and_confidence_interval(ax, mean, lb, ub, x_tick_as_dates=None, color_mean=None, color_shading=None):
+def plot_mean_and_confidence_interval(
+    ax,
+    mean,
+    lb,
+    ub,
+    x_tick_as_dates=None,
+    color_mean=None,
+    color_shading=None,
+):
     # Reference: plot_mean_and_CI() in https://github.com/woctezuma/humble-monthly/blob/master/plot_time_series.py
     # Reference: https://studywolf.wordpress.com/2017/11/21/matplotlib-legends-for-mean-and-confidence-interval-plots/
 
@@ -234,8 +283,7 @@ def plot_mean_and_confidence_interval(ax, mean, lb, ub, x_tick_as_dates=None, co
         x_tick_as_dates = range(mean.shape[0])
 
     # plot the shaded range of the confidence intervals
-    ax.fill_between(x_tick_as_dates, ub, lb,
-                    color=color_shading, alpha=.5)
+    ax.fill_between(x_tick_as_dates, ub, lb, color=color_shading, alpha=0.5)
     # plot the mean on top
     ax.plot(x_tick_as_dates, mean, color_mean)
 
@@ -285,17 +333,24 @@ def get_mean_and_confidence_interval(x_list, is_variable_of_interest_numeric=Tru
     return mean, lb, ub
 
 
-def plot_time_series_for_numeric_variable_of_interest(release_calendar,
-                                                      steam_database=None,
-                                                      statistic_str=None,
-                                                      description_keyword=None,
-                                                      legend_keyword=None,
-                                                      starting_year=None,
-                                                      is_variable_of_interest_numeric=True,
-                                                      max_ordinate=None,
-                                                      plot_confidence_interval_if_possible=True):
+def plot_time_series_for_numeric_variable_of_interest(
+    release_calendar,
+    steam_database=None,
+    statistic_str=None,
+    description_keyword=None,
+    legend_keyword=None,
+    starting_year=None,
+    is_variable_of_interest_numeric=True,
+    max_ordinate=None,
+    plot_confidence_interval_if_possible=True,
+):
     # Get x: dates and y: a set of appIDs of games released for each date in x
-    (x, y_raw) = get_x_y_time_series(release_calendar, steam_database, description_keyword, starting_year)
+    (x, y_raw) = get_x_y_time_series(
+        release_calendar,
+        steam_database,
+        description_keyword,
+        starting_year,
+    )
 
     # Compute the value of interest y from y_raw
     feature_list = []
@@ -307,15 +362,24 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
             else:
                 # noinspection PyPep8
                 g = generic_converter
-            features = [g(steam_database[app_id][description_keyword]) for app_id in app_ids]
+            features = [
+                g(steam_database[app_id][description_keyword]) for app_id in app_ids
+            ]
         else:
             features = app_ids
 
         feature_list.append(features)
 
     confidence_interval_data = {}
-    if plot_confidence_interval_if_possible and statistic_str is not None and statistic_str == 'Average':
-        (mean, lb, ub) = get_mean_and_confidence_interval(feature_list, is_variable_of_interest_numeric)
+    if (
+        plot_confidence_interval_if_possible
+        and statistic_str is not None
+        and statistic_str == 'Average'
+    ):
+        (mean, lb, ub) = get_mean_and_confidence_interval(
+            feature_list,
+            is_variable_of_interest_numeric,
+        )
         # Thresholding of lower-bound of confidence interval so that it is non-negative
         lb = np.array([max(i, 0) for i in lb])
 
@@ -349,7 +413,9 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
     if description_keyword == 'price_overview':
         # Convert from cents to euros
         for entry in confidence_interval_data:
-            confidence_interval_data[entry] = np.array([i / 100 for i in confidence_interval_data[entry]])
+            confidence_interval_data[entry] = np.array(
+                [i / 100 for i in confidence_interval_data[entry]],
+            )
 
     # Plot legend
     if description_keyword is None:
@@ -361,7 +427,9 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
         my_ylabel = statistic_str + ' price (in €)'
         my_plot_filename = statistic_str.lower() + '_price'
     else:
-        if is_variable_of_interest_numeric and (statistic_str == 'Median' or statistic_str == 'Average'):
+        if is_variable_of_interest_numeric and (
+            statistic_str == 'Median' or statistic_str == 'Average'
+        ):
             statistic_legend = statistic_str + ' '
         else:
             statistic_legend = ''
@@ -388,8 +456,17 @@ def plot_time_series_for_numeric_variable_of_interest(release_calendar,
     month_formatting = bool(starting_year is not None)
 
     # Plot
-    plot_x_y_time_series(x, y, my_title, my_ylabel, my_plot_filename, month_formatting, is_variable_of_interest_numeric,
-                         max_ordinate, confidence_interval_data)
+    plot_x_y_time_series(
+        x,
+        y,
+        my_title,
+        my_ylabel,
+        my_plot_filename,
+        month_formatting,
+        is_variable_of_interest_numeric,
+        max_ordinate,
+        confidence_interval_data,
+    )
 
     return
 
@@ -404,91 +481,182 @@ def generic_converter(my_boolean):
     return x
 
 
-def plot_time_series_for_boolean_variable_of_interest(release_calendar,
-                                                      steam_database,
-                                                      description_keyword='controller_support',
-                                                      legend_keyword=None,
-                                                      starting_year=None,
-                                                      max_ordinate=1.0):
+def plot_time_series_for_boolean_variable_of_interest(
+    release_calendar,
+    steam_database,
+    description_keyword='controller_support',
+    legend_keyword=None,
+    starting_year=None,
+    max_ordinate=1.0,
+):
     statistic_str = 'Average'
     is_variable_of_interest_numeric = False
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar,
-                                                      steam_database,
-                                                      statistic_str,
-                                                      description_keyword,
-                                                      legend_keyword,
-                                                      starting_year,
-                                                      is_variable_of_interest_numeric,
-                                                      max_ordinate)
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        statistic_str,
+        description_keyword,
+        legend_keyword,
+        starting_year,
+        is_variable_of_interest_numeric,
+        max_ordinate,
+    )
 
     return
 
 
 def fill_in_platform_support(steam_database):
     for app_id in steam_database:
-        steam_database[app_id]['windows_support'] = steam_database[app_id]['platforms']['windows']
-        steam_database[app_id]['mac_support'] = steam_database[app_id]['platforms']['mac']
-        steam_database[app_id]['linux_support'] = steam_database[app_id]['platforms']['linux']
+        steam_database[app_id]['windows_support'] = steam_database[app_id]['platforms'][
+            'windows'
+        ]
+        steam_database[app_id]['mac_support'] = steam_database[app_id]['platforms'][
+            'mac'
+        ]
+        steam_database[app_id]['linux_support'] = steam_database[app_id]['platforms'][
+            'linux'
+        ]
 
     return steam_database
 
 
 def fill_in_drm_support(steam_database):
     for app_id in steam_database:
-        steam_database[app_id]['drm_support'] = bool(steam_database[app_id]['drm_notice'] is not None)
+        steam_database[app_id]['drm_support'] = bool(
+            steam_database[app_id]['drm_notice'] is not None,
+        )
 
     return steam_database
 
 
 def plot_every_time_series_based_on_steam_calendar(release_calendar, steam_database):
-    plot_time_series_for_numeric_variable_of_interest(release_calendar)  # Plot number of releases
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+    )  # Plot number of releases
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'price_overview')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Median',
+        'price_overview',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'price_overview')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Average',
+        'price_overview',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'achievements')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Median',
+        'achievements',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'achievements')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Average',
+        'achievements',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'dlc')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Average',
+        'dlc',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'metacritic',
-                                                      'Metacritic score')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Median',
+        'metacritic',
+        'Metacritic score',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'metacritic',
-                                                      'Metacritic score')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Average',
+        'metacritic',
+        'Metacritic score',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Median', 'recommendations')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Median',
+        'recommendations',
+    )
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Average', 'recommendations')
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Average',
+        'recommendations',
+    )
 
     sentence_prefixe = 'Proportion of games with '
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'controller_support',
-                                                      sentence_prefixe + 'controller support')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'controller_support',
+        sentence_prefixe + 'controller support',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'demos',
-                                                      sentence_prefixe + 'a demo')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'demos',
+        sentence_prefixe + 'a demo',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'ext_user_account_notice',
-                                                      sentence_prefixe + '3rd-party account')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'ext_user_account_notice',
+        sentence_prefixe + '3rd-party account',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'required_age',
-                                                      sentence_prefixe + 'age check')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'required_age',
+        sentence_prefixe + 'age check',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'windows_support',
-                                                      sentence_prefixe + 'Windows support')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'windows_support',
+        sentence_prefixe + 'Windows support',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'mac_support',
-                                                      sentence_prefixe + 'Mac support')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'mac_support',
+        sentence_prefixe + 'Mac support',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'linux_support',
-                                                      sentence_prefixe + 'Linux support')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'linux_support',
+        sentence_prefixe + 'Linux support',
+    )
 
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'drm_support',
-                                                      sentence_prefixe + '3rd-party DRM')
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'drm_support',
+        sentence_prefixe + '3rd-party DRM',
+    )
 
     return
 
@@ -502,16 +670,25 @@ def plot_durante_request(release_calendar, steam_database):
     sentence_prefixe = 'Proportion of games with '
 
     # noinspection PyTypeChecker
-    plot_time_series_for_boolean_variable_of_interest(release_calendar, steam_database, 'drm_support',
-                                                      sentence_prefixe + '3rd-party DRM',
-                                                      chosen_starting_year,
-                                                      chosen_max_ordinate)
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'drm_support',
+        sentence_prefixe + '3rd-party DRM',
+        chosen_starting_year,
+        chosen_max_ordinate,
+    )
 
     sentence_prefixe = 'Number of games with '
 
-    plot_time_series_for_numeric_variable_of_interest(release_calendar, steam_database, 'Sum', 'drm_support',
-                                                      sentence_prefixe + '3rd-party DRM',
-                                                      chosen_starting_year)
+    plot_time_series_for_numeric_variable_of_interest(
+        release_calendar,
+        steam_database,
+        'Sum',
+        'drm_support',
+        sentence_prefixe + '3rd-party DRM',
+        chosen_starting_year,
+    )
 
     return
 
@@ -526,63 +703,103 @@ def get_dict_value_as_keyword(dictionary, selected_key):
 
 def fill_in_categorie(steam_database, categorie_keyword, categorie_index):
     for app_id in steam_database:
-        steam_database[app_id][categorie_keyword] = bool(int(categorie_index) in steam_database[app_id]['categories'])
+        steam_database[app_id][categorie_keyword] = bool(
+            int(categorie_index) in steam_database[app_id]['categories'],
+        )
 
     return steam_database
 
 
 def fill_in_genre(steam_database, genre_keyword, genre_index):
     for app_id in steam_database:
-        steam_database[app_id][genre_keyword] = bool(int(genre_index) in steam_database[app_id]['genres'])
+        steam_database[app_id][genre_keyword] = bool(
+            int(genre_index) in steam_database[app_id]['genres'],
+        )
 
     return steam_database
 
 
-def plot_time_series_categorie(release_calendar, steam_database, all_categories, selected_categorie_index):
-    selected_categorie_keyword = get_dict_value_as_keyword(all_categories, selected_categorie_index)
+def plot_time_series_categorie(
+    release_calendar,
+    steam_database,
+    all_categories,
+    selected_categorie_index,
+):
+    selected_categorie_keyword = get_dict_value_as_keyword(
+        all_categories,
+        selected_categorie_index,
+    )
 
-    steam_database = fill_in_categorie(steam_database, selected_categorie_keyword, selected_categorie_index)
+    steam_database = fill_in_categorie(
+        steam_database,
+        selected_categorie_keyword,
+        selected_categorie_index,
+    )
 
-    chosen_legend_keyword = 'Proportion of categorie ' + all_categories[selected_categorie_index]
+    chosen_legend_keyword = (
+        'Proportion of categorie ' + all_categories[selected_categorie_index]
+    )
     chosen_starting_year = 2009
     chosen_max_ordinate = None
 
     # noinspection PyTypeChecker
-    plot_time_series_for_boolean_variable_of_interest(release_calendar,
-                                                      steam_database,
-                                                      selected_categorie_keyword,
-                                                      chosen_legend_keyword,
-                                                      chosen_starting_year,
-                                                      chosen_max_ordinate)
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        selected_categorie_keyword,
+        chosen_legend_keyword,
+        chosen_starting_year,
+        chosen_max_ordinate,
+    )
 
     return
 
 
-def plot_time_series_genre(release_calendar, steam_database, all_genres, selected_genre_index):
+def plot_time_series_genre(
+    release_calendar,
+    steam_database,
+    all_genres,
+    selected_genre_index,
+):
     selected_genre_keyword = get_dict_value_as_keyword(all_genres, selected_genre_index)
 
-    steam_database = fill_in_genre(steam_database, selected_genre_keyword, selected_genre_index)
+    steam_database = fill_in_genre(
+        steam_database,
+        selected_genre_keyword,
+        selected_genre_index,
+    )
 
     chosen_legend_keyword = 'Proportion of genre ' + all_genres[selected_genre_index]
     chosen_starting_year = 2009
     chosen_max_ordinate = None
 
     # noinspection PyTypeChecker
-    plot_time_series_for_boolean_variable_of_interest(release_calendar,
-                                                      steam_database,
-                                                      selected_genre_keyword,
-                                                      chosen_legend_keyword,
-                                                      chosen_starting_year,
-                                                      chosen_max_ordinate)
+    plot_time_series_for_boolean_variable_of_interest(
+        release_calendar,
+        steam_database,
+        selected_genre_keyword,
+        chosen_legend_keyword,
+        chosen_starting_year,
+        chosen_max_ordinate,
+    )
 
     return
 
 
-def plot_every_time_series_based_on_categories_and_genres(release_calendar, steam_database,
-                                                          categories_dict, genres_dict):
+def plot_every_time_series_based_on_categories_and_genres(
+    release_calendar,
+    steam_database,
+    categories_dict,
+    genres_dict,
+):
     for categorie_key in categories_dict:
         print(categories_dict[categorie_key])
-        plot_time_series_categorie(release_calendar, steam_database, categories_dict, categorie_key)
+        plot_time_series_categorie(
+            release_calendar,
+            steam_database,
+            categories_dict,
+            categorie_key,
+        )
 
     for genre_key in genres_dict:
         print(genres_dict[genre_key])
@@ -622,8 +839,12 @@ def main():
 
     plot_durante_request(steam_calendar, steamspy_database)
 
-    plot_every_time_series_based_on_categories_and_genres(steam_calendar, steamspy_database, all_categories_dict,
-                                                          all_genres_dict)
+    plot_every_time_series_based_on_categories_and_genres(
+        steam_calendar,
+        steamspy_database,
+        all_categories_dict,
+        all_genres_dict,
+    )
 
     return True
 
