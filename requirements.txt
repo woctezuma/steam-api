@@ -3,6 +3,6 @@ numpy==1.26.4
 requests==2.31.0
 scipy==1.12.0
 scikit-learn
-umap-learn==0.5.3
+umap-learn==0.5.5
 steampi==0.5.2
 steamspypi==1.1.1
